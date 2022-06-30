@@ -416,4 +416,5 @@ FodyWeavers.xsd
 **/.idea/**/*.iml
 **/.idea/**/contentModel.xml
 **/.idea/**/modules.xml
-.idea/.idea.nexnux.net/.idea/encodings.xml
+.idea/**
+
