@@ -17,9 +17,9 @@ namespace nexnux.net
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow
+                desktop.MainWindow = new GameListView
                 {
-                    DataContext = new MainWindowViewModel(),
+                    DataContext = new GameListViewModel()
                 };
             }
 

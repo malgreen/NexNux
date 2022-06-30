@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        MinWidth="400" MinHeight="450"
+        Width="400" Height="450"
+        x:Class="nexnux.net.Views.GameListView"
+        Title="GameListView"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent">
+
+
+  <DockPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+
+      <Border Padding="0, 20, 0, 10" DockPanel.Dock="Top">
+        <StackPanel Orientation="Horizontal" Spacing="40">
+          <Button Command="{Binding AddGameCommand}" Width="120" HorizontalContentAlignment="Center">Add Game</Button>
+          <Button Command="{Binding RemoveGameCommand}" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Remove Game</Button>
+        </StackPanel>
+      </Border>
+
+      <Border DockPanel.Dock="Top">
+          <ListBox Items="{Binding Games}" Height="300"
+                   SelectedItem="{Binding SelectedGame, Mode=TwoWay}">
+              
+          </ListBox>
+      </Border>
+
+      <Border Padding="0, 10, 0, 20" DockPanel.Dock="Bottom">
+          <StackPanel Orientation="Horizontal"  Spacing="40">
+              <Button IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Choose Game</Button>
+              <Button Command="{Binding EditGameCommand}" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Edit Game</Button>
+          </StackPanel>
+      </Border>
+
+  </DockPanel>
+</Window>
