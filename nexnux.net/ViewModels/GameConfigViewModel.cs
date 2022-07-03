@@ -1,6 +1,13 @@
-﻿using System.Reactive;
+﻿using System;
+using System.IO;
+using System.Net.Mime;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media;
 using nexnux.net.Models;
 using nexnux.net.Views;
 using ReactiveUI;
@@ -11,7 +18,7 @@ public class GameConfigViewModel : ViewModelBase
 {
     public GameConfigViewModel()
     {
-        SaveGameCommand = ReactiveCommand.Create(SaveGame);
+        SaveGameCommand = ReactiveCommand.CreateFromTask(SaveGame);
         ChooseDeployPathCommand = ReactiveCommand.CreateFromTask(ChooseDeployPath);
         ChooseModsPathCommand = ReactiveCommand.CreateFromTask(ChooseModsPath);
     }
@@ -40,26 +47,34 @@ public class GameConfigViewModel : ViewModelBase
     public ReactiveCommand<Unit, string> ChooseDeployPathCommand { get; }
     public ReactiveCommand<Unit, string> ChooseModsPathCommand { get; }
 
-    public Game SaveGame()
+    public Task<Game> SaveGame()
     {
-        Game game = new Game(GameName, DeployPath, ModsPath);
-        return game;
+        try
+        {
+            Game game = new Game(GameName, DeployPath, ModsPath);
+            return Task.FromResult(game);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     async Task<string> ChooseDeployPath()
     {
-        string path = string.Empty;
+        string path;
         OpenFolderDialog folderDialog = new OpenFolderDialog();
-        path = await folderDialog.ShowAsync(new GameConfigView());
+        path = await folderDialog.ShowAsync(new GameConfigView()) ?? string.Empty;
         DeployPath = path;
         return path;
     }
 
     async Task<string> ChooseModsPath()
     {
-        string path = string.Empty;
+        string path;
         OpenFolderDialog folderDialog = new OpenFolderDialog();
-        path = await folderDialog.ShowAsync(new GameConfigView());
+        path = await folderDialog.ShowAsync(new GameConfigView()) ?? string.Empty;
         ModsPath = path;
         return path;
     }

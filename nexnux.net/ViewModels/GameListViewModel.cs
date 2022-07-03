@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls.Shapes;
 using nexnux.net.Models;
 using ReactiveUI;
+using Path = System.IO.Path;
 
 namespace nexnux.net.ViewModels;
 
@@ -12,14 +15,16 @@ public class GameListViewModel : ViewModelBase
 {
     public GameListViewModel()
     {
-        MainGameList = new GameList("C:\\Users\\Malgreen\\Desktop\\ExtractTest\\avalonia\\games.json");
+        string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        string gameListFile = Path.Combine(userFolder, ".nexnux", "GameList.json");
+        MainGameList = new GameList(gameListFile);
         Games = new ObservableCollection<Game>(MainGameList.LoadList());
         ShowConfigDialog = new Interaction<GameConfigViewModel, Game?>();
         
         AddGameCommand = ReactiveCommand.CreateFromTask(AddGame);
         EditGameCommand = ReactiveCommand.CreateFromTask(EditGame);
 
-            RemoveGameCommand = ReactiveCommand.Create(RemoveGame);
+        RemoveGameCommand = ReactiveCommand.Create(RemoveGame);
         Games.CollectionChanged += SaveGameList;
         
     }

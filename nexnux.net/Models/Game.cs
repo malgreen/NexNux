@@ -24,17 +24,9 @@ public class Game
 
     void ValidateFolders()
     {
-        try
-        {
-            Directory.CreateDirectory(DeployDirectory);
-            Directory.CreateDirectory(ModDirectory);
-            ModListFile = Path.Combine(ModDirectory, "ModList.json");
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.StackTrace);
-            throw;
-        }
+        Directory.CreateDirectory(DeployDirectory);
+        Directory.CreateDirectory(ModDirectory);
+        ModListFile = Path.Combine(ModDirectory, "ModList.json");
     }
 
     public List<Mod> GetAllMods()

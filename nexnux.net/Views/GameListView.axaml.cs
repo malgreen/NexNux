@@ -28,10 +28,10 @@ namespace nexnux.net.Views
 
         private async Task DoShowDialogAsync(InteractionContext<GameConfigViewModel, Game?> interactionContext)
         {
-            var dialog = new GameConfigView();
+            GameConfigView dialog = new GameConfigView();
             dialog.DataContext = interactionContext.Input;
 
-            var result = await dialog.ShowDialog<Game>(this);
+            Game? result = await dialog.ShowDialog<Game>(this);
             interactionContext.SetOutput(result);
         }
     }
