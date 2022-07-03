@@ -43,13 +43,14 @@ public class ModList
         }
         catch (FileNotFoundException ex)
         {
+            Debug.WriteLine(ex);
             Mods = new List<Mod>();
             SaveList();
             LoadList();
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex.StackTrace);
+            Debug.WriteLine(ex);
         }
 
         return loadedMods;

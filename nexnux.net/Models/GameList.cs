@@ -20,6 +20,7 @@ public class GameList
     {
         try
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(GameListFile));
             using FileStream createStream = File.Create(GameListFile);
             JsonSerializer.Serialize(createStream, Games, new JsonSerializerOptions() { WriteIndented = true });
             createStream.Dispose();
@@ -41,13 +42,21 @@ public class GameList
         }
         catch (FileNotFoundException ex)
         {
+            Debug.WriteLine(ex);
+            Games = new List<Game>(); //Make sure we don't write null to a JSON file
+            SaveList();
+            LoadList();
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            Debug.WriteLine(ex);
             Games = new List<Game>(); //Make sure we don't write null to a JSON file
             SaveList();
             LoadList();
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex.StackTrace);
+            Debug.WriteLine(ex);
         }
 
         return loadedGames;

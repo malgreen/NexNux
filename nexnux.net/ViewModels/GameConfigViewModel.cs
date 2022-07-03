@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Mime;
 using System.Reactive;
@@ -11,6 +12,7 @@ using Avalonia.Media;
 using nexnux.net.Models;
 using nexnux.net.Views;
 using ReactiveUI;
+using MessageBox.Avalonia;
 
 namespace nexnux.net.ViewModels;
 
@@ -21,6 +23,7 @@ public class GameConfigViewModel : ViewModelBase
         SaveGameCommand = ReactiveCommand.CreateFromTask(SaveGame);
         ChooseDeployPathCommand = ReactiveCommand.CreateFromTask(ChooseDeployPath);
         ChooseModsPathCommand = ReactiveCommand.CreateFromTask(ChooseModsPath);
+        
     }
     private string _gameName;
     public string GameName
@@ -43,21 +46,25 @@ public class GameConfigViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _modsPath, value);
     }
 
-    public ReactiveCommand<Unit, Game> SaveGameCommand { get; }
+    public ReactiveCommand<Unit, Game?> SaveGameCommand { get; }
     public ReactiveCommand<Unit, string> ChooseDeployPathCommand { get; }
     public ReactiveCommand<Unit, string> ChooseModsPathCommand { get; }
 
-    public Task<Game> SaveGame()
+    public async Task<Game?> SaveGame()
     {
         try
         {
-            Game game = new Game(GameName, DeployPath, ModsPath);
-            return Task.FromResult(game);
+            Game? game = new Game(GameName, DeployPath, ModsPath);
+            return game;
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            // This is really not a good way to show this, but who knows how else to do it?
+            // Perhaps all the error checking could be done in here, without a pop-up, but just disabling save button until it lgtm?
+            var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error", e.Message);
+            await messageBox.Show();
+            Debug.WriteLine(e);
+            return null; // We check for null returns when opening the game config window
         }
     }
 

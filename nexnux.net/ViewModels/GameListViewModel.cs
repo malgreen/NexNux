@@ -15,8 +15,8 @@ public class GameListViewModel : ViewModelBase
 {
     public GameListViewModel()
     {
-        string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        string gameListFile = Path.Combine(userFolder, ".nexnux", "GameList.json");
+        string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        string gameListFile = Path.Combine(userFolder, "NexNux", "GameList.json");
         MainGameList = new GameList(gameListFile);
         Games = new ObservableCollection<Game>(MainGameList.LoadList());
         ShowConfigDialog = new Interaction<GameConfigViewModel, Game?>();
@@ -48,7 +48,7 @@ public class GameListViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> AddGameCommand { get; }
     public ReactiveCommand<Unit, Unit> EditGameCommand { get; }
     public ReactiveCommand<Unit, Unit> RemoveGameCommand { get; }
-    public Interaction<GameConfigViewModel, Game> ShowConfigDialog { get; }
+    public Interaction<GameConfigViewModel, Game?> ShowConfigDialog { get; }
 
     private async Task AddGame()
     {

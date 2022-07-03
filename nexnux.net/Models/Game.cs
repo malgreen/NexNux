@@ -27,6 +27,11 @@ public class Game
         Directory.CreateDirectory(DeployDirectory);
         Directory.CreateDirectory(ModDirectory);
         ModListFile = Path.Combine(ModDirectory, "ModList.json");
+
+        FileInfo deployInfo = new FileInfo(DeployDirectory);
+        FileInfo modsInfo = new FileInfo(ModDirectory);
+        if (!Equals(Path.GetPathRoot(deployInfo.FullName), Path.GetPathRoot(modsInfo.FullName)))
+            throw new Exception("Directories must reside on the same drive"); // Hardlink deployment cannot be done if different drives
     }
 
     public List<Mod> GetAllMods()
