@@ -1,19 +1,53 @@
-﻿namespace nexnux.net.Models;
+﻿using System.ComponentModel;
 
-public class Mod
+namespace nexnux.net.Models;
+
+public class Mod : INotifyPropertyChanged
 {
-    public Mod(string modName, double fileSize, long index, bool enabled)
+    public Mod(string modName, string modPath, double fileSize, long index, bool enabled)
     {
         ModName = modName;
+        ModPath = modPath;
         FileSize = fileSize;
         Index = index;
         Enabled = enabled;
     }
 
     public string ModName { get; }
+    public string ModPath { get; set; }
     public double FileSize { get; }
-    public long Index { get; set; }
-    public bool  Enabled { get; set; }
+
+    private long _index;
+    public long Index
+    {
+        get => _index;
+        set
+        {
+            _index = value;
+            NotifyPropertyChanged();
+        }
+    }
+
+    private bool _enabled;
+    public bool  Enabled
+    {
+        get => _enabled;
+        set
+        {
+            _enabled = value;
+            NotifyPropertyChanged();
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void NotifyPropertyChanged(string propertyName = "")
+    {
+        if (PropertyChanged != null)
+        {
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
 
     public override string ToString()
     {

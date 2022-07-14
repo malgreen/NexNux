@@ -24,7 +24,6 @@ public class ModList
             using FileStream createStream = File.Create(_modListFileName);
             JsonSerializer.Serialize(createStream, Mods, new JsonSerializerOptions(){ WriteIndented = true });
             createStream.Dispose();
-
         }
         catch (Exception ex)
         {
@@ -69,9 +68,9 @@ public class ModList
         }
     }
 
-    public void ModifyMod(string modName, double fileSize, long index, bool enabled)
+    public void ModifyMod(string modName, string modPath, double fileSize, long index, bool enabled)
     {
-        Mod mod = new Mod(modName, fileSize, index, enabled);
+        Mod mod = new Mod(modName, modPath, fileSize, index, enabled);
         RemoveMod(mod);
         Mods.Add(mod);
     }
