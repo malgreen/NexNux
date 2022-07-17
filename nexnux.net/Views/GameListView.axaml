@@ -6,9 +6,7 @@
         MinWidth="400" MinHeight="450"
         Width="400" Height="450"
         x:Class="nexnux.net.Views.GameListView"
-        Title="GameListView"
-        TransparencyLevelHint="AcrylicBlur"
-        Background="Transparent">
+        Title="GameListView">
 
 
   <DockPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -21,15 +19,16 @@
       </Border>
 
       <Border DockPanel.Dock="Top">
-          <ListBox Items="{Binding Games}" Height="300"
-                   SelectedItem="{Binding SelectedGame, Mode=TwoWay}">
-              
-          </ListBox>
+		  <ListBox Items="{Binding Games}" Height="300"
+                   SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
+				   >
+
+		  </ListBox>
       </Border>
 
       <Border Padding="0, 10, 0, 20" DockPanel.Dock="Bottom">
           <StackPanel Orientation="Horizontal"  Spacing="40">
-              <Button IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Choose Game</Button>
+              <Button Command="{Binding ChooseGameCommand}" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Choose Game</Button>
               <Button Command="{Binding EditGameCommand}" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Edit Game</Button>
           </StackPanel>
       </Border>

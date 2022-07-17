@@ -2,13 +2,73 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="clr-namespace:nexnux.net.ViewModels;assembly=nexnux.net"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="670"
         x:Class="nexnux.net.Views.ModListView"
         Title="ModListView">
-    <DockPanel>
-        <DataGrid DockPanel.Dock="Left"></DataGrid>
-        <StackPanel DockPanel.Dock="Right">
-            <Button>DataGrid</Button>
-        </StackPanel>
-    </DockPanel>
+	
+	
+	<Design.DataContext>
+		<vm:ModListViewModel/>
+	</Design.DataContext>
+	
+	<DockPanel>
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="1*"/>
+				<ColumnDefinition Width="1*" />
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="1*" />
+				<RowDefinition Height="1*" />
+				<RowDefinition Height="75" />
+			</Grid.RowDefinitions>
+			
+			<Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="2">
+				<DataGrid Name="GridMods"
+							Background="Transparent"
+							Items="{Binding VisibleMods}"  
+							AutoGenerateColumns="False"
+							DragDrop.AllowDrop="True"
+							CanUserSortColumns="False"
+							SelectedItem="{Binding SelectedMod, Mode=TwoWay}"
+							SelectionMode="Single"
+							AlternatingRowBackground="LightGray"
+							>
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Order" Binding="{Binding Index}" Width="1*" CanUserResize="False" IsReadOnly="False" />
+						<DataGridTextColumn Header="Name" Binding="{Binding ModName}" Width="3*" CanUserResize="True" IsReadOnly="True"/>
+						<DataGridTextColumn Header="Filesize" Binding="{Binding FileSize}" Width="2*" CanUserResize="True" IsReadOnly="True" />
+						<!-- The next column is much the same as a CheckBoxColumn, but it doesn't need to be double clicked to be changed -->
+						<DataGridTemplateColumn Header="Enabled" Width="1*" CanUserResize="False">
+							<DataTemplate>
+								<CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center"/>
+							</DataTemplate>
+						</DataGridTemplateColumn>
+					</DataGrid.Columns>
+				</DataGrid>
+			</Border>
+			
+			<Border Grid.Column="0" Grid.Row="2" Margin="10">
+				<DockPanel>
+					<Button Command="{Binding InstallModCommand}" DockPanel.Dock="Left" HorizontalAlignment="Right">Install new mod</Button>
+					<Button Command="{Binding UninstallModCommand}" DockPanel.Dock="Right" HorizontalAlignment="Right">Uninstall mod</Button>
+				</DockPanel>
+			</Border>
+		
+
+			<Border Grid.Column="1" Grid.Row="0" Margin="10" MaxWidth="300" >
+				<TextBox Text="{Binding ModInfo}" IsReadOnly="True" Watermark="No mod selected" Background="Transparent" IsEnabled="False" HorizontalContentAlignment="Center"></TextBox>
+			</Border>
+					
+			<Border Grid.Column="1" Grid.Row="1" Margin="10" VerticalAlignment="Top" HorizontalAlignment="Center">
+				<Button>Configure mod</Button>
+			</Border>
+			
+			<Border Grid.Column="1" Grid.Row="2" Margin="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+				<Button>Deploy mods</Button>
+			</Border>
+			
+		</Grid>
+	</DockPanel>
 </Window>

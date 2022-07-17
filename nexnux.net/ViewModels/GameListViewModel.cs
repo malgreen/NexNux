@@ -4,8 +4,10 @@ using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Shapes;
 using nexnux.net.Models;
+using nexnux.net.Views;
 using ReactiveUI;
 using Path = System.IO.Path;
 
@@ -23,10 +25,10 @@ public class GameListViewModel : ViewModelBase
         
         AddGameCommand = ReactiveCommand.CreateFromTask(AddGame);
         EditGameCommand = ReactiveCommand.CreateFromTask(EditGame);
+        ChooseGameCommand = ReactiveCommand.Create(ChooseGame);
 
         RemoveGameCommand = ReactiveCommand.Create(RemoveGame);
-        Games.CollectionChanged += SaveGameList;
-        
+        Games.CollectionChanged += SaveGameList;        
     }
 
     public GameList MainGameList { get; set; }
@@ -48,6 +50,7 @@ public class GameListViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> AddGameCommand { get; }
     public ReactiveCommand<Unit, Unit> EditGameCommand { get; }
     public ReactiveCommand<Unit, Unit> RemoveGameCommand { get; }
+    public ReactiveCommand<Unit, Unit> ChooseGameCommand { get; }
     public Interaction<GameConfigViewModel, Game?> ShowConfigDialog { get; }
 
     private async Task AddGame()
@@ -77,6 +80,24 @@ public class GameListViewModel : ViewModelBase
         {
             Games.Remove(SelectedGame);
             Games.Add(result);
+        }
+    }
+
+    private void ChooseGame()
+    {
+        if (Avalonia.Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            ModListViewModel modListViewModel = new ModListViewModel();
+            modListViewModel.UpdateCurrentGame(SelectedGame); //Doing it through a constructor is not really what we want from MVVM
+            desktop.MainWindow = new ModListView
+            {
+                DataContext = modListViewModel //I don't believe this is proper MVVM, maybe this should be done in the view's code-behind?
+                                               //Too bad!
+            };
+            
+            
+            desktop.MainWindow.Show(); //again I think this should be done in the code-behind so it is actually testable
+         
         }
     }
 

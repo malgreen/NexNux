@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using nexnux.net.Models;
 using nexnux.net.ViewModels;
 using ReactiveUI;
+using System;
 
 namespace nexnux.net.Views;
 
@@ -15,6 +16,7 @@ public partial class ModListView : Window
     public ModListView()
     {
         InitializeComponent();
+        this.DataContextChanged += ModListView_DataContextChanged;
 #if DEBUG
         this.AttachDevTools();
 #endif
@@ -32,5 +34,13 @@ public partial class ModListView : Window
     void EndDrag()
     {
        
+    }
+
+    private void ModListView_DataContextChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is ModListViewModel modListViewModel)
+        {
+            Title = "NexNux - " + modListViewModel.CurrentGame.ToString();
+        }
     }
 }
