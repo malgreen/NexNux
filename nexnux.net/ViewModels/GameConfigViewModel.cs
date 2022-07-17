@@ -61,8 +61,15 @@ public class GameConfigViewModel : ViewModelBase
         {
             // This is really not a good way to show this, but who knows how else to do it?
             // Perhaps all the error checking could be done in here, without a pop-up, but just disabling save button until it lgtm?
-            var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error", e.Message);
-            await messageBox.Show();
+            var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", e.Message, MessageBox.Avalonia.Enums.ButtonEnum.Ok);
+            
+            // Get active window
+            if (Avalonia.Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                await messageBox.ShowDialog(desktop.MainWindow);
+            }
+
+            //await messageBox.Show();
             Debug.WriteLine(e);
             return null; // We check for null returns when opening the game config window
         }

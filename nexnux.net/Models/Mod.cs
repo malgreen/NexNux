@@ -35,7 +35,7 @@ public class Mod : INotifyPropertyChanged
         set
         {
             _enabled = value;
-            NotifyPropertyChanged();
+            NotifyPropertyChanged("Enabled");
         }
     }
 
