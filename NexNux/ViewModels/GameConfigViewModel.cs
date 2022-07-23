@@ -25,21 +25,21 @@ public class GameConfigViewModel : ViewModelBase
         ChooseModsPathCommand = ReactiveCommand.CreateFromTask(ChooseModsPath);
         
     }
-    private string _gameName;
+    private string _gameName = null!;
     public string GameName
     {
         get => _gameName;
         set => this.RaiseAndSetIfChanged(ref _gameName, value);
     }
     
-    private string _deployPath;
+    private string _deployPath = null!;
     public string DeployPath
     {
         get => _deployPath;
         set => this.RaiseAndSetIfChanged(ref _deployPath, value);
     }
 
-    private string _modsPath;
+    private string _modsPath = null!;
     public string ModsPath
     {
         get => _modsPath;
@@ -64,7 +64,7 @@ public class GameConfigViewModel : ViewModelBase
             var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", e.Message, MessageBox.Avalonia.Enums.ButtonEnum.Ok);
             
             // Get active window
-            if (Avalonia.Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 await messageBox.ShowDialog(desktop.MainWindow);
             }

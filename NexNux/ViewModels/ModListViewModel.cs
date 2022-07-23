@@ -28,35 +28,35 @@ namespace NexNux.ViewModels
         }
         private int _testModIterator;
 
-        private Game _currentGame;
+        private Game _currentGame = null!;
         public Game CurrentGame
         {
             get => _currentGame;
             set => this.RaiseAndSetIfChanged(ref _currentGame, value);
         }
 
-        private ModList _currentModList;
+        private ModList _currentModList = null!;
         public ModList CurrentModList
         {
             get => _currentModList;
             set => this.RaiseAndSetIfChanged(ref _currentModList, value);
         }
 
-        private ObservableCollection<Mod> _visibleMods;
+        private ObservableCollection<Mod> _visibleMods = null!;
         public ObservableCollection<Mod> VisibleMods
         {
             get => _visibleMods;
             set => this.RaiseAndSetIfChanged(ref _visibleMods, value);
         }
 
-        private Mod _selectedMod;
+        private Mod _selectedMod = null!;
         public Mod SelectedMod
         {
             get => _selectedMod;
             set => this.RaiseAndSetIfChanged(ref _selectedMod, value);
         }
 
-        private string _modInfo;
+        private string _modInfo = null!;
         public string ModInfo
         {
             get => _modInfo;
@@ -75,7 +75,7 @@ namespace NexNux.ViewModels
             CurrentModList = new ModList(modListFile);
 
             VisibleMods = new ObservableCollection<Mod>(CurrentModList.LoadList());
-            SetModListeners(VisibleMods, null);
+            SetModListeners(VisibleMods, null!);
 
             _testModIterator = VisibleMods.Count;
             VisibleMods.CollectionChanged += UpdateModList;
