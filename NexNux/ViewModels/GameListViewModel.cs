@@ -6,12 +6,12 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Shapes;
-using nexnux.net.Models;
-using nexnux.net.Views;
+using NexNux.Models;
+using NexNux.Views;
 using ReactiveUI;
 using Path = System.IO.Path;
 
-namespace nexnux.net.ViewModels;
+namespace NexNux.ViewModels;
 
 public class GameListViewModel : ViewModelBase
 {

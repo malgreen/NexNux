@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
-namespace nexnux.net.Models;
+namespace NexNux.Models;
 
 public class ModList
 {

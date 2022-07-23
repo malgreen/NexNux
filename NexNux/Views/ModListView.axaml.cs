@@ -4,12 +4,12 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
 using Avalonia.Input;
 using System.Collections.Generic;
-using nexnux.net.Models;
-using nexnux.net.ViewModels;
+using NexNux.Models;
 using ReactiveUI;
 using System;
+using NexNux.ViewModels;
 
-namespace nexnux.net.Views;
+namespace NexNux.Views;
 
 public partial class ModListView : Window
 {

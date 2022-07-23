@@ -9,12 +9,12 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
-using nexnux.net.Models;
-using nexnux.net.Views;
 using ReactiveUI;
 using MessageBox.Avalonia;
+using NexNux.Models;
+using NexNux.Views;
 
-namespace nexnux.net.ViewModels;
+namespace NexNux.ViewModels;
 
 public class GameConfigViewModel : ViewModelBase
 {

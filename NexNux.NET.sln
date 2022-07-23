@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nexnux.net", "nexnux.net\nexnux.net.csproj", "{ED3268D5-49C5-42EC-AF0F-92F296071DBB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexNux", "NexNux\NexNux.csproj", "{ED3268D5-49C5-42EC-AF0F-92F296071DBB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

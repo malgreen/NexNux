@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace nexnux.net.ViewModels
+namespace NexNux.ViewModels
 {
     public class ViewModelBase : ReactiveObject
     {

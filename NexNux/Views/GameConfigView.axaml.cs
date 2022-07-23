@@ -4,10 +4,10 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using nexnux.net.ViewModels;
+using NexNux.ViewModels;
 using ReactiveUI;
 
-namespace nexnux.net.Views
+namespace NexNux.Views
 {
     public partial class GameConfigView : ReactiveWindow<GameConfigViewModel>
     {

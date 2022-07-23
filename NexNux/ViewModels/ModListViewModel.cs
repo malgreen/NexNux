@@ -4,15 +4,15 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using nexnux.net.Models;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using ReactiveUI;
 using System.Reactive;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Collections;
+using NexNux.Models;
 
-namespace nexnux.net.ViewModels
+namespace NexNux.ViewModels
 {
     public class ModListViewModel : ViewModelBase
     {

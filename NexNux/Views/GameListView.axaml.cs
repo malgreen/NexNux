@@ -3,11 +3,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using nexnux.net.ViewModels;
-using nexnux.net.Models;
+using NexNux.Models;
+using NexNux.ViewModels;
 using ReactiveUI;
 
-namespace nexnux.net.Views
+namespace NexNux.Views
 {
     public partial class GameListView : ReactiveWindow<GameListViewModel>
     {

@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using nexnux.net.ViewModels;
+using NexNux.ViewModels;
 
-namespace nexnux.net
+namespace NexNux
 {
     public class ViewLocator : IDataTemplate
     {

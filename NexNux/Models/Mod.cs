@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace nexnux.net.Models;
+namespace NexNux.Models;
 
 public class Mod : INotifyPropertyChanged
 {

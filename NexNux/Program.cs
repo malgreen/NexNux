@@ -2,7 +2,7 @@
 using Avalonia.ReactiveUI;
 using System;
 
-namespace nexnux.net
+namespace NexNux
 {
     class Program
     {

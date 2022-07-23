@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using nexnux.net.ViewModels;
-using nexnux.net.Views;
+using NexNux.ViewModels;
+using NexNux.Views;
 
-namespace nexnux.net
+namespace NexNux
 {
     public partial class App : Application
     {
