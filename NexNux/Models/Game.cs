@@ -12,7 +12,7 @@ public class Game
         GameName = gameName;
         DeployDirectory = deployDirectory;
         ModDirectory = modDirectory;
-        ValidateFolders();
+        ValidateInfo();
         _modList = new ModList(ModListFile ?? throw new InvalidOperationException());
     }
 
@@ -22,8 +22,10 @@ public class Game
     public string ModListFile { get; set; }
     private ModList _modList;
 
-    void ValidateFolders()
+    void ValidateInfo()
     {
+        if (GameName.Equals(string.Empty))
+            throw new Exception("Game must have a name");
         Directory.CreateDirectory(DeployDirectory);
         Directory.CreateDirectory(ModDirectory);
         ModListFile = Path.Combine(ModDirectory, "ModList.json");

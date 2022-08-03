@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Mime;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -23,7 +24,19 @@ public class GameConfigViewModel : ViewModelBase
         SaveGameCommand = ReactiveCommand.CreateFromTask(SaveGame);
         ChooseDeployPathCommand = ReactiveCommand.CreateFromTask(ChooseDeployPath);
         ChooseModsPathCommand = ReactiveCommand.CreateFromTask(ChooseModsPath);
+        ShowErrorDialog = new Interaction<string, string>();
         
+        CanAddGame = false;
+        StatusMessage = string.Empty;
+        GameName = string.Empty;
+        ModsPath = string.Empty;
+        DeployPath = string.Empty;
+
+        this.WhenAnyValue(x => x.GameName).Subscribe(x => ValidateGameInput());
+        this.WhenAnyValue(x => x.DeployPath).Subscribe(x => ValidateGameInput());
+        this.WhenAnyValue(x => x.ModsPath).Subscribe(x => ValidateGameInput());
+
+
     }
     private string _gameName = null!;
     public string GameName
@@ -46,9 +59,24 @@ public class GameConfigViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _modsPath, value);
     }
 
+    private bool _canAddGame;
+    public bool CanAddGame
+    {
+        get => _canAddGame;
+        set => this.RaiseAndSetIfChanged(ref _canAddGame, value);
+    }
+
+    private string _statusMessage = null!;
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
+    }
+
     public ReactiveCommand<Unit, Game?> SaveGameCommand { get; }
     public ReactiveCommand<Unit, string> ChooseDeployPathCommand { get; }
     public ReactiveCommand<Unit, string> ChooseModsPathCommand { get; }
+    public Interaction<string, string> ShowErrorDialog { get; } 
 
     public async Task<Game?> SaveGame()
     {
@@ -59,17 +87,7 @@ public class GameConfigViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            // This is really not a good way to show this, but who knows how else to do it?
-            // Perhaps all the error checking could be done in here, without a pop-up, but just disabling save button until it lgtm?
-            var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", e.Message, MessageBox.Avalonia.Enums.ButtonEnum.Ok);
-            
-            // Get active window
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                await messageBox.ShowDialog(desktop.MainWindow);
-            }
-
-            //await messageBox.Show();
+            await ShowErrorDialog.Handle(e.Message);
             Debug.WriteLine(e);
             return null; // We check for null returns when opening the game config window
         }
@@ -91,5 +109,25 @@ public class GameConfigViewModel : ViewModelBase
         path = await folderDialog.ShowAsync(new GameConfigView()) ?? string.Empty;
         ModsPath = path;
         return path;
+    }
+
+    void ValidateGameInput()
+    {
+        CanAddGame = false;
+        if (GameName.Equals(string.Empty))
+            StatusMessage = "❌ Game must have a name";
+        else if (DeployPath.Equals(string.Empty))
+            StatusMessage = "❌ Game must have a deploy directory";
+        else if (ModsPath.Equals(string.Empty))
+            StatusMessage = "❌ Game must have a mods directory";
+        else if (!Equals(Path.GetPathRoot(DeployPath), Path.GetPathRoot(ModsPath)))
+            StatusMessage = "❌ Directories must reside on the same drive";
+        else if (Directory.EnumerateFileSystemEntries(ModsPath).Any()) // This makes it so the editing a game no longer works
+            StatusMessage = "❌ Mods directory must be empty";
+        else
+        {
+            StatusMessage = "✅ Looks good";
+            CanAddGame = true;
+        }
     }
 }

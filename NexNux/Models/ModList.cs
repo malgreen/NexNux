@@ -28,6 +28,7 @@ public class ModList
         catch (Exception ex)
         {
             Debug.WriteLine(ex.StackTrace);
+            throw new UnauthorizedAccessException(ex.Message); // these nested exceptions are awful, pls fix (we also have try/catch in config VM)
         }
     }
 

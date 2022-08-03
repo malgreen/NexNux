@@ -30,7 +30,8 @@
         
         <Border Padding="10" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal" Spacing="20">
-                <Button Command="{Binding SaveGameCommand}">Save</Button>
+                <Label Content="{Binding StatusMessage}"></Label>
+                <Button Command="{Binding SaveGameCommand}" IsEnabled="{Binding CanAddGame}" >Save</Button>
                 <Button Click="Cancel_OnClick" IsCancel="True">Cancel</Button>
             </StackPanel>
         </Border>

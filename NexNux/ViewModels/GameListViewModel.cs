@@ -65,7 +65,7 @@ public class GameListViewModel : ViewModelBase
 
     private void RemoveGame()
     {
-        _games.Remove(_selectedGame);
+        Games.Remove(_selectedGame);
     }
 
     private async Task EditGame()
