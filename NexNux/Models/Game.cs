@@ -26,14 +26,15 @@ public class Game
     {
         if (GameName.Equals(string.Empty))
             throw new Exception("Game must have a name");
-        Directory.CreateDirectory(DeployDirectory);
-        Directory.CreateDirectory(ModDirectory);
-        ModListFile = Path.Combine(ModDirectory, "ModList.json");
 
         FileInfo deployInfo = new FileInfo(DeployDirectory);
         FileInfo modsInfo = new FileInfo(ModDirectory);
         if (!Equals(Path.GetPathRoot(deployInfo.FullName), Path.GetPathRoot(modsInfo.FullName)))
             throw new Exception("Directories must reside on the same drive"); // Hardlink deployment cannot be done if different drives
+
+        Directory.CreateDirectory(DeployDirectory);
+        Directory.CreateDirectory(ModDirectory);
+        ModListFile = Path.Combine(ModDirectory, "ModList.json");
     }
 
     public List<Mod> GetAllMods()
@@ -44,6 +45,25 @@ public class Game
     public List<Mod> GetActiveMods()
     {
         throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Deletes all files and folders from the Game's 'mods' directory
+    /// </summary>
+    /// TODO: When mod deployment is implemented, should also restore all original files first
+    public void DeleteMods()
+    {
+        DirectoryInfo dirInfo = new DirectoryInfo(ModDirectory);
+
+        foreach (FileInfo file in dirInfo.GetFiles())
+        {
+            file.Delete();
+        }
+
+        foreach (DirectoryInfo dir in dirInfo.GetDirectories())
+        {
+            dir.Delete(true);
+        }
     }
 
     public override string ToString()

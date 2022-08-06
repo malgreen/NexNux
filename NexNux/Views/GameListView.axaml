@@ -29,7 +29,7 @@
       <Border Padding="0, 10, 0, 20" DockPanel.Dock="Bottom">
           <StackPanel Orientation="Horizontal"  Spacing="40">
               <Button Command="{Binding ChooseGameCommand}" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Choose Game</Button>
-              <Button Command="{Binding EditGameCommand}" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Edit Game</Button>
+              <Button Command="{Binding EditGameCommand}" IsEnabled="False" Width="120" HorizontalContentAlignment="Center">Edit Game</Button>
           </StackPanel>
       </Border>
 

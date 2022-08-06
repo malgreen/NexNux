@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -22,12 +23,13 @@ public class GameListViewModel : ViewModelBase
         MainGameList = new GameList(gameListFile);
         Games = new ObservableCollection<Game>(MainGameList.LoadList());
         ShowConfigDialog = new Interaction<GameConfigViewModel, Game?>();
+        ShowRemoveDialog = new Interaction<Game, bool>();
         
         AddGameCommand = ReactiveCommand.CreateFromTask(AddGame);
         EditGameCommand = ReactiveCommand.CreateFromTask(EditGame);
         ChooseGameCommand = ReactiveCommand.Create(ChooseGame);
 
-        RemoveGameCommand = ReactiveCommand.Create(RemoveGame);
+        RemoveGameCommand = ReactiveCommand.CreateFromTask(RemoveGame);
         Games.CollectionChanged += SaveGameList;        
     }
 
@@ -52,6 +54,7 @@ public class GameListViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RemoveGameCommand { get; }
     public ReactiveCommand<Unit, Unit> ChooseGameCommand { get; }
     public Interaction<GameConfigViewModel, Game?> ShowConfigDialog { get; }
+    public Interaction<Game, bool> ShowRemoveDialog { get; }
 
     private async Task AddGame()
     {
@@ -59,18 +62,25 @@ public class GameListViewModel : ViewModelBase
         Game? result = await ShowConfigDialog.Handle(config);
         if (result != null)
         {
-            Games.Add(result);
+            MainGameList.ModifyGame(result.GameName, result.DeployDirectory, result.ModDirectory);
+            Games = new ObservableCollection<Game>(MainGameList.Games); // There might very well be a better way to do this
         }
     }
 
-    private void RemoveGame()
+    private async Task RemoveGame()
     {
-        Games.Remove(_selectedGame);
+        bool result = await ShowRemoveDialog.Handle(_selectedGame); // Will return true if Ok is pressed, false if Cancel is pressed
+        if (result)
+        {
+            MainGameList.RemoveGame(_selectedGame);
+            Games = new ObservableCollection<Game>(MainGameList.Games); // as said before, there might be better way to do this
+        }
     }
 
     private async Task EditGame()
     {
         // Here we want to start the config view but pass in the existing stuff :)
+        // This probably should not exist, so the button is disabled in the view
         GameConfigViewModel config = new GameConfigViewModel();
         config.GameName = SelectedGame.GameName;
         config.DeployPath = SelectedGame.DeployDirectory;

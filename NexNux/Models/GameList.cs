@@ -64,21 +64,33 @@ public class GameList
 
     public void ModifyGame(string gameName, string deployDir, string modDir)
     {
+        // Maybe there should be a try-catch within this?
         if (DirsInUse(deployDir, modDir))
             throw new Exception("Directories already in use");
         Game game = new Game(gameName, deployDir, modDir);
-        RemoveGame(game);
+        Games.Remove(game); // This does not currently use the RemoveGame method because that would delete everything,
+                            // not sure if modifying game dirs should be supported at the minute
         Games.Add(game);
         SaveList();
         
     }
     public void RemoveGame(Game game)
     {
-        Game? existingGame = Games.Find(item => item.GameName == game.GameName);
-        while (existingGame != null)
+        try
         {
-            Games.Remove(existingGame);
-            existingGame = Games.Find(item => item.GameName == game.GameName);
+            Game? existingGame = Games.Find(item => item.GameName == game.GameName);
+            while (existingGame != null)
+            {
+                existingGame.DeleteMods();
+                Games.Remove(existingGame);
+                existingGame = Games.Find(item => item.GameName == game.GameName);
+            }
+            SaveList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
         }
     }
 
