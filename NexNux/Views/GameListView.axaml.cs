@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using MessageBox.Avalonia;
@@ -17,6 +18,7 @@ namespace NexNux.Views
             InitializeComponent();
             this.WhenActivated(d => d(ViewModel!.ShowConfigDialog.RegisterHandler(DoShowGameConfigDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.ShowRemoveDialog.RegisterHandler(DoShowGameRemoveDialogAsync)));
+            this.WhenActivated(d => d(ViewModel!.ShowModList.RegisterHandler(DoShowModListWindow)));
 #if DEBUG
             this.AttachDevTools();
 #endif
@@ -46,6 +48,20 @@ namespace NexNux.Views
                 );
             var result = await messageBox.Show(this);
             interactionContext.SetOutput(result == ButtonResult.Ok);
+        }
+
+        private Task DoShowModListWindow(InteractionContext<ModListViewModel, bool> interactionContext)
+        {
+            ModListView modListView = new ModListView();
+            modListView.DataContext = interactionContext.Input;
+            modListView.Show();
+            if (Avalonia.Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
+            {
+                desktopLifetime.MainWindow = modListView;
+            }
+            interactionContext.SetOutput(true); // maybe this should not be an interaction
+            Close();
+            return Task.CompletedTask;
         }
     }
 }

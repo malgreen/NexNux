@@ -22,12 +22,14 @@ public class GameListViewModel : ViewModelBase
         string gameListFile = Path.Combine(userFolder, "NexNux", "GameList.json");
         MainGameList = new GameList(gameListFile);
         Games = new ObservableCollection<Game>(MainGameList.LoadList());
+
         ShowConfigDialog = new Interaction<GameConfigViewModel, Game?>();
         ShowRemoveDialog = new Interaction<Game, bool>();
+        ShowModList = new Interaction<ModListViewModel, bool>();
         
         AddGameCommand = ReactiveCommand.CreateFromTask(AddGame);
         EditGameCommand = ReactiveCommand.CreateFromTask(EditGame);
-        ChooseGameCommand = ReactiveCommand.Create(ChooseGame);
+        ChooseGameCommand = ReactiveCommand.CreateFromTask(ChooseGame);
 
         RemoveGameCommand = ReactiveCommand.CreateFromTask(RemoveGame);
         Games.CollectionChanged += SaveGameList;        
@@ -55,6 +57,7 @@ public class GameListViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ChooseGameCommand { get; }
     public Interaction<GameConfigViewModel, Game?> ShowConfigDialog { get; }
     public Interaction<Game, bool> ShowRemoveDialog { get; }
+    public Interaction<ModListViewModel, bool> ShowModList {get;}
 
     private async Task AddGame()
     {
@@ -93,22 +96,11 @@ public class GameListViewModel : ViewModelBase
         }
     }
 
-    private void ChooseGame()
+    private async Task ChooseGame()
     {
-        if (Avalonia.Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            ModListViewModel modListViewModel = new ModListViewModel();
-            modListViewModel.UpdateCurrentGame(SelectedGame); //Doing it through a constructor is not really what we want from MVVM
-            desktop.MainWindow = new ModListView
-            {
-                DataContext = modListViewModel //I don't believe this is proper MVVM, maybe this should be done in the view's code-behind?
-                                               //Too bad!
-            };
-            
-            
-            desktop.MainWindow.Show(); //again I think this should be done in the code-behind so it is actually testable
-         
-        }
+        ModListViewModel modListViewModel = new ModListViewModel();
+        modListViewModel.UpdateCurrentGame(SelectedGame);
+        await ShowModList.Handle(modListViewModel);
     }
 
     private void SaveGameList(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
