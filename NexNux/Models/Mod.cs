@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.IO;
 
 namespace NexNux.Models;
 
@@ -15,7 +17,17 @@ public class Mod : INotifyPropertyChanged
 
     public string ModName { get; }
     public string ModPath { get; set; }
-    public double FileSize { get; }
+
+    private double _fileSize;
+    public double FileSize
+    {
+        get => _fileSize;
+        set
+        {
+            _fileSize = value;
+            NotifyPropertyChanged("FileSize");
+        }
+    }
 
     private long _index;
     public long Index
@@ -24,7 +36,7 @@ public class Mod : INotifyPropertyChanged
         set
         {
             _index = value;
-            NotifyPropertyChanged();
+            NotifyPropertyChanged("Index");
         }
     }
 
@@ -47,6 +59,11 @@ public class Mod : INotifyPropertyChanged
         {
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    public void DeleteFiles()
+    {
+        Directory.Delete(ModPath, true);
     }
 
     public override string ToString()

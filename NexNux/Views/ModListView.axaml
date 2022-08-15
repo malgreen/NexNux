@@ -24,7 +24,7 @@
 				<RowDefinition Height="75" />
 			</Grid.RowDefinitions>
 			
-			<Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="2">
+			<Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="3">
 				<DataGrid Name="GridMods"
 							Background="Transparent"
 							Items="{Binding VisibleMods}"  
@@ -36,9 +36,9 @@
 							AlternatingRowBackground="LightGray"
 							>
 					<DataGrid.Columns>
-						<DataGridTextColumn Header="Order" Binding="{Binding Index}" Width="1*" CanUserResize="False" IsReadOnly="False" />
+						<DataGridTextColumn Header="Order" Binding="{Binding Index}" Width="1*" CanUserResize="False" IsReadOnly="True" />
 						<DataGridTextColumn Header="Name" Binding="{Binding ModName}" Width="3*" CanUserResize="True" IsReadOnly="True"/>
-						<DataGridTextColumn Header="Filesize" Binding="{Binding FileSize}" Width="2*" CanUserResize="True" IsReadOnly="True" />
+						<DataGridTextColumn Header="Size (mb)" Binding="{Binding FileSize}" Width="2*" CanUserResize="True" IsReadOnly="True" />
 						<!-- The next column is much the same as a CheckBoxColumn, but it doesn't need to be double clicked to be changed -->
 						<DataGridTemplateColumn Header="Enabled" Width="1*" CanUserResize="False">
 							<DataTemplate>
@@ -57,7 +57,7 @@
 			</Border>
 		
 
-			<Border Grid.Column="1" Grid.Row="0" Margin="10" MaxWidth="300" >
+			<Border Grid.Column="1" Grid.Row="0" Margin="10">
 				<TextBox Text="{Binding ModInfo}" IsReadOnly="True" Watermark="No mod selected" Background="Transparent" IsEnabled="False" HorizontalContentAlignment="Center"></TextBox>
 			</Border>
 					

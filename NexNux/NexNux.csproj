@@ -9,8 +9,8 @@
     </PropertyGroup>
     <ItemGroup>
         <Folder Include="Controls\" />
-        <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" />
+        <Folder Include="Utilities\" />
         <None Remove=".gitignore" />
     </ItemGroup>
     <ItemGroup>
@@ -21,14 +21,15 @@
         <TrimmableAssembly Include="Avalonia.Themes.Default" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="0.10.15" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.15" />
-        <PackageReference Include="Avalonia.Desktop" Version="0.10.15" />
+        <PackageReference Include="Avalonia" Version="0.10.17" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.17" />
+        <PackageReference Include="Avalonia.Desktop" Version="0.10.17" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.15" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.15" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.17" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.17" />
         <PackageReference Include="Avalonia.Xaml.Interactions.DragAndDrop" Version="0.10.3" />
-        <PackageReference Include="MessageBox.Avalonia" Version="2.0.1" />
+        <PackageReference Include="MessageBox.Avalonia" Version="2.0.2" />
+        <PackageReference Include="SharpCompress" Version="0.32.2" />
         <PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
     </ItemGroup>
 </Project>

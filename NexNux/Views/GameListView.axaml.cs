@@ -42,7 +42,7 @@ namespace NexNux.Views
         {
             var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
                 "Are you sure?",
-                $"This will also delete ALL mods and settings previously configured for {interactionContext.Input} within NexNux", // currently this is a lie
+                $"This will also delete ALL mods and settings previously configured for {interactionContext.Input} within NexNux",
                 ButtonEnum.OkCancel,
                 MessageBox.Avalonia.Enums.Icon.Warning
                 );

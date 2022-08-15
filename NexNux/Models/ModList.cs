@@ -28,7 +28,7 @@ public class ModList
         catch (Exception ex)
         {
             Debug.WriteLine(ex.StackTrace);
-            throw new UnauthorizedAccessException(ex.Message); // these nested exceptions are awful, pls fix (we also have try/catch in config VM)
+            throw new UnauthorizedAccessException(ex.Message); // these nested exceptions are awful, pls fix (we also have try/catch in game config VM)
         }
     }
 
@@ -69,20 +69,18 @@ public class ModList
         }
     }
 
-    public void ModifyMod(string modName, string modPath, double fileSize, long index, bool enabled)
+    public void InstallMod(Mod mod, string rootPath)
     {
-        Mod mod = new Mod(modName, modPath, fileSize, index, enabled);
-        RemoveMod(mod);
-        Mods.Add(mod);
+        throw new NotImplementedException();
     }
 
-    public void RemoveMod(Mod mod)
+    public void ModifyMod(string modName, string modPath, double fileSize, long index, bool enabled)
     {
-        Mod? existingMod = Mods.Find(item => item.ModName == mod.ModName);
-        while (existingMod != null)
-        {
-            Mods.Remove(existingMod);
-            existingMod = Mods.Find(item => item.ModName == mod.ModName);
-        }
+        throw new NotImplementedException();
+    }
+
+    public void UninstallMod(Mod mod)
+    {
+        throw new NotImplementedException();
     }
 }

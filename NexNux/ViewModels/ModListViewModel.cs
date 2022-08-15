@@ -10,7 +10,12 @@ using System.Reactive;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Collections;
+using System.IO;
+using System.Reactive.Linq;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using NexNux.Models;
+using NexNux.Views;
 
 namespace NexNux.ViewModels
 {
@@ -18,6 +23,11 @@ namespace NexNux.ViewModels
     {
         public ModListViewModel()
         {
+            ShowModInstallDialog = new Interaction<ModConfigViewModel, Mod?>();
+            ShowModUninstallDialog = new Interaction<Mod, bool>();
+            ShowErrorDialog = new Interaction<string, bool>();
+            ShowModExistsDialog = new Interaction<Mod, bool>();
+
             VisibleMods = new ObservableCollection<Mod>();
             VisibleMods.CollectionChanged += UpdateModList;
 
@@ -26,7 +36,6 @@ namespace NexNux.ViewModels
 
             this.WhenAnyValue(x => x.SelectedMod).Subscribe(x => UpdateModInfo());            
         }
-        private int _testModIterator;
 
         private Game _currentGame = null!;
         public Game CurrentGame
@@ -65,6 +74,10 @@ namespace NexNux.ViewModels
 
         public ReactiveCommand<Unit, Unit> InstallModCommand { get; }
         public ReactiveCommand<Unit, Unit> UninstallModCommand { get; }
+        public Interaction<ModConfigViewModel, Mod?> ShowModInstallDialog { get; }
+        public Interaction<Mod, bool> ShowModUninstallDialog { get; }
+        public Interaction<string, bool> ShowErrorDialog { get; }
+        public Interaction<Mod, bool> ShowModExistsDialog { get; }
 
 
         public void UpdateCurrentGame(Game game)
@@ -77,47 +90,96 @@ namespace NexNux.ViewModels
             VisibleMods = new ObservableCollection<Mod>(CurrentModList.LoadList());
             SetModListeners(VisibleMods, null!);
 
-            _testModIterator = VisibleMods.Count;
             VisibleMods.CollectionChanged += UpdateModList;
         }
 
-        void InstallMod()
+        async void InstallMod()
         {
-            // For now this adds a placeholder mod
-            _testModIterator++;
-            string modName = $"Mod{_testModIterator}";
-            string modPath = $"C:\\FakePath\\mod{_testModIterator}";
-            Random rnd = new Random();
-            double modSize = rnd.NextDouble();
-            long modIndex = 0;
-            bool modEnabled = false;
-            Mod mod = new Mod(modName, modPath, modSize, modIndex, modEnabled);
-            VisibleMods.Add(mod);
+            try
+            {
+                ModConfigViewModel modConfigViewModel = new ModConfigViewModel();
+                modConfigViewModel.CurrentGame = CurrentGame;
+                Mod mod = await ShowModInstallDialog.Handle(modConfigViewModel);
+                if (mod == null)
+                {
+                    Directory.Delete(Path.Combine(CurrentGame.ModDirectory, "__installcache"), true);
+                    return;
+                }
+
+                Mod existingMod = VisibleMods.FirstOrDefault(item => item.ModName == mod.ModName);
+                string installedModPath = Path.Combine(CurrentGame.ModDirectory, mod.ModName);
+
+                if (existingMod != null)
+                {
+                    bool result = await ShowModExistsDialog.Handle(mod);
+                    if (result)
+                    {
+                        MoveExtractedFiles(modConfigViewModel.CurrentRoot.ItemPath, installedModPath);
+                        DirectoryInfo dirInfo = new DirectoryInfo(existingMod.ModPath);
+                        existingMod.FileSize = Math.Round(await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length)) * 0.000001); //converts bytes to mb
+                    }
+                }
+                else
+                {
+                    MoveExtractedFiles(modConfigViewModel.CurrentRoot.ItemPath, installedModPath);
+                    DirectoryInfo dirInfo = new DirectoryInfo(mod.ModPath);
+                    mod.FileSize = Math.Round(await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length)) * 0.000001); //converts bytes to mb
+
+                    VisibleMods.Add(mod);
+                }
+                Directory.Delete(Path.Combine(CurrentGame.ModDirectory, "__installcache"), true);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+                await ShowErrorDialog.Handle(e.Message);
+            }
+
         }
 
-        void UninstallMod()
+        async void UninstallMod()
         {
-            if (SelectedMod == null) return;
-            VisibleMods.Remove(SelectedMod);
+            try
+            {
+                bool result = await ShowModUninstallDialog.Handle(SelectedMod);
+                if (!result) return;
+                SelectedMod.DeleteFiles();
+                VisibleMods.Remove(SelectedMod);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                VisibleMods.Remove(SelectedMod); //this exception doesn't matter
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+                await ShowErrorDialog.Handle(e.Message);
+            }
         }
 
         void UpdateModInfo()
         {
-            if (SelectedMod == null) return;
-
-            string finalModInfo = string.Empty;
-            finalModInfo += SelectedMod.ModName + "\n";
-            finalModInfo += SelectedMod.ModPath + "\n";
-            finalModInfo += SelectedMod.FileSize + " gb\n";
-            finalModInfo += "Is enabled: " + SelectedMod.Enabled + "\n";
-            //This can all be changed later, but the subscribtion to property changes works
-            ModInfo = finalModInfo;
+            if (SelectedMod == null)
+            {
+                ModInfo = "No mod selected";
+            }
+            else
+            {
+                string finalModInfo = string.Empty;
+                finalModInfo += SelectedMod.ModName + "\n";
+                finalModInfo += SelectedMod.ModPath + "\n";
+                finalModInfo += SelectedMod.FileSize + " MB\n";
+                finalModInfo += "Is enabled: " + SelectedMod.Enabled + "\n";
+                //This can all be changed later, but the subscription to property changes works
+                ModInfo = finalModInfo;
+            }
         }
 
         void UpdateModList(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             foreach(Mod mod in VisibleMods)
             {
+                if (mod == null) continue;
                 mod.Index = VisibleMods.IndexOf(mod);
             }
             SetModListeners(e.NewItems, e.OldItems);
@@ -152,6 +214,26 @@ namespace NexNux.ViewModels
         {
             CurrentModList.Mods = VisibleMods.ToList();
             CurrentModList.SaveList();
+        }
+        private void MoveExtractedFiles(string source, string target)
+        {
+            // Taken from https://stackoverflow.com/a/2553245
+
+            var sourcePath = source;
+            var targetPath = target;
+            var files = Directory.EnumerateFiles(sourcePath, "*", SearchOption.AllDirectories)
+                .GroupBy(s => Path.GetDirectoryName(s));
+            foreach (var folder in files)
+            {
+                var targetFolder = folder.Key.Replace(sourcePath, targetPath);
+                Directory.CreateDirectory(targetFolder);
+                foreach (var file in folder)
+                {
+                    var targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
+                    if (File.Exists(targetFile)) File.Delete(targetFile);
+                    File.Move(file, targetFile);
+                }
+            }
         }
     }
 }
