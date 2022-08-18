@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace NexNux.Models;
+namespace NexNux.Utilities;
 
 public interface IModItem
 {

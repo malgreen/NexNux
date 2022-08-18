@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
-using NexNux.Models;
+using NexNux.Utilities;
 
 namespace NexNux.Converters;
 

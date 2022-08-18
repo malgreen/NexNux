@@ -64,7 +64,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
             AllowMultiple = false,
-            Title = "Choose input file",
+            Title = "Choose mod archive",
             Filters = new List<FileDialogFilter>
             {
                 new FileDialogFilter()
@@ -92,7 +92,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
     {
         var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
             $"Uninstalling {interactionContext.Input}, are you sure?",
-            $"This will also delete the files for {interactionContext.Input} from your system.", // currently this is a lie
+            $"This will also delete the files for \"{interactionContext.Input}\" from your system.", // currently this is a lie
             ButtonEnum.OkCancel,
             MessageBox.Avalonia.Enums.Icon.Warning
         );
@@ -104,7 +104,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
     {
         var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
             "Mod already exists",
-            $"Mod: {interactionContext.Input} already exists, continuing will merge the two, while overriding existing files.", // currently this is a lie
+            $"Mod \"{interactionContext.Input}\" already exists, continuing will merge the two while overriding existing files.", // currently this is a lie
             ButtonEnum.OkCancel,
             MessageBox.Avalonia.Enums.Icon.Info
         );

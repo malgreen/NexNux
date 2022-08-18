@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using NexNux.Utilities;
 
 namespace NexNux.ViewModels;
 
@@ -23,7 +24,6 @@ public class ModConfigViewModel : ViewModelBase
         SetSelectionToClipboardCommand = ReactiveCommand.CreateFromTask(SetSelectionToClipboard);
         InstallModCommand = ReactiveCommand.CreateFromTask(InstallMod);
         CancelCommand = ReactiveCommand.CreateFromTask(Cancel);
-        _extractedModSize = 0;
     }
 
     private Game _currentGame;
@@ -89,8 +89,6 @@ public class ModConfigViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _currentRoot, value);
     }
 
-    private double _extractedModSize;
-
     public ReactiveCommand<Unit, Unit> SetSelectionToRootCommand { get; set; }
     public ReactiveCommand<Unit, Unit> SetSelectionToClipboardCommand { get; set; }
     public ReactiveCommand<Unit, Mod?> InstallModCommand { get; }
@@ -120,7 +118,7 @@ public class ModConfigViewModel : ViewModelBase
         try
         {
             await using Stream stream = File.OpenRead(inputPath);
-            using IArchive archive = ArchiveFactory.Open(stream);
+            using IArchive archive = ArchiveFactory.Open(stream); //We have to use archive->reader, because ReaderFactory does not support Rar archives
             ArchiveSize = archive.Entries.Count(d => !d.IsDirectory); //Used in view
             using IReader? reader = archive.ExtractAllEntries();
 
@@ -140,9 +138,9 @@ public class ModConfigViewModel : ViewModelBase
                 });
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e);
+            Debug.WriteLine(ex.StackTrace);
         }
 
         if (ExtractionProgress != 100) ExtractionProgress = 100;
@@ -158,11 +156,6 @@ public class ModConfigViewModel : ViewModelBase
         rootItem.SubItems = GetSubItems(rootPath);
         //ExtractedFiles.Add(rootItem);
         ExtractedFiles = rootItem.SubItems; //TBD - should it also show the root folder, or just files within it?
-
-        // this is not necessary atm, as the size of the mod is now updated in ModListViewModel
-        //DirectoryInfo dirInfo = new DirectoryInfo(rootItem.ItemPath);
-        //_extractedModSize = Math.Round(await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length)) * 0.000001); //converts bytes to mb
-
     }
 
     private ObservableCollection<IModItem> GetSubItems(string itemPath)
@@ -204,7 +197,7 @@ public class ModConfigViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Debug.WriteLine(ex.StackTrace);
         }
     }
 
@@ -213,12 +206,12 @@ public class ModConfigViewModel : ViewModelBase
         try
         {
             string installedModPath = Path.Combine(CurrentGame.ModDirectory, ModName);
-            Mod mod = new Mod(ModName, installedModPath, _extractedModSize, CurrentGame.GetAllMods().Count, false);
+            Mod mod = new Mod(ModName, installedModPath, 0, CurrentGame.GetAllMods().Count, false); //FileSize is updated in the ModListVM
             return mod;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex);
+            Debug.WriteLine(ex.StackTrace);
             return null;
         }
     }

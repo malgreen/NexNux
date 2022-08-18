@@ -15,7 +15,6 @@ namespace NexNux.Views
         public ModConfigView()
         {
             InitializeComponent();
-            //this.WhenActivated(d => d(ViewModel!.InstallModCommand.Subscribe(Close)));
             this.WhenActivated(d => d(ViewModel!.InstallModCommand.Subscribe(Close)));
             this.WhenActivated(d => d(ViewModel!.CancelCommand.Subscribe(Close)));
 #if DEBUG
