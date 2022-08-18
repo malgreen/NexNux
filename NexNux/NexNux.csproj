@@ -10,7 +10,6 @@
     <ItemGroup>
         <Folder Include="Controls\" />
         <AvaloniaResource Include="Assets\**" />
-        <Folder Include="Utilities\" />
         <None Remove=".gitignore" />
     </ItemGroup>
     <ItemGroup>

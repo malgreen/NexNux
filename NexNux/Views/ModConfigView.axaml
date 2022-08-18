@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         d:DesignWidth="450" d:DesignHeight="450"
         Width="450" Height="450"
+        MinWidth="450" MinHeight="450"
         x:Class="NexNux.Views.ModConfigView"
         Title="ModConfigView">
     <Window.Resources>
@@ -38,7 +39,7 @@
                   <TreeView Name="ItemTreeView" Items="{Binding ExtractedFiles}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" IsVisible="{Binding !IsExtracting}" HorizontalAlignment="Stretch">
                       <TreeView.ItemTemplate>
                           <TreeDataTemplate ItemsSource="{Binding SubItems}">
-                              <TextBlock Text="{Binding ItemName}">
+                              <TextBlock Text="{Binding}">
                                 <TextBlock.ContextFlyout>
                                     <MenuFlyout>
                                         <MenuItem Header="Make root" 
@@ -64,7 +65,7 @@
 
           <Border Grid.Column="1" Grid.Row="3" Padding="10">
               <StackPanel  Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                  <Button Command="{Binding InstallModCommand}" IsVisible="{Binding !IsExtracting}" IsEnabled="{Binding ModName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" >Install</Button>
+                  <Button Command="{Binding InstallModCommand}" IsVisible="{Binding !IsExtracting}" IsEnabled="{Binding ModName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">Install</Button>
                   <Button Command="{Binding CancelCommand}">Cancel</Button>
               </StackPanel>
           </Border>
