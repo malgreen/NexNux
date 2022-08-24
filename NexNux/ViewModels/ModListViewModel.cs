@@ -97,12 +97,13 @@ namespace NexNux.ViewModels
         {
             try
             {
+                string installCacheDir = Path.Combine(CurrentGame.ModSettingsDirectory, "__installcache");
                 ModConfigViewModel modConfigViewModel = new ModConfigViewModel();
                 modConfigViewModel.CurrentGame = CurrentGame;
                 Mod mod = await ShowModInstallDialog.Handle(modConfigViewModel);
                 if (mod == null)
                 {
-                    Directory.Delete(Path.Combine(CurrentGame.ModDirectory, "__installcache"), true);
+                    if (Directory.Exists(installCacheDir)){ Directory.Delete(installCacheDir, true); }
                     return;
                 }
 
@@ -127,7 +128,7 @@ namespace NexNux.ViewModels
 
                     VisibleMods.Add(mod);
                 }
-                Directory.Delete(Path.Combine(CurrentGame.ModDirectory, "__installcache"), true);
+                if (Directory.Exists(installCacheDir)){ Directory.Delete(installCacheDir, true); }
             }
             catch (Exception e)
             {

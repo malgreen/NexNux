@@ -12,6 +12,7 @@ public class Game
         GameName = gameName;
         DeployDirectory = deployDirectory;
         ModDirectory = modDirectory;
+        ModSettingsDirectory = Path.Combine(ModDirectory, ".NexNux");
         ValidateInfo();
         _modList = new ModList(ModListFile ?? throw new InvalidOperationException());
     }
@@ -19,6 +20,7 @@ public class Game
     public string GameName { get; set; }
     public string DeployDirectory { get; set; }
     public string ModDirectory { get; set; }
+    public string ModSettingsDirectory { get; set; }
     public string ModListFile { get; set; }
     private ModList _modList;
 
@@ -34,7 +36,8 @@ public class Game
 
         Directory.CreateDirectory(DeployDirectory);
         Directory.CreateDirectory(ModDirectory);
-        ModListFile = Path.Combine(ModDirectory, "ModList.json");
+        Directory.CreateDirectory(ModSettingsDirectory);
+        ModListFile = Path.Combine(ModSettingsDirectory, "ModList.json");
     }
 
     public List<Mod> GetAllMods()

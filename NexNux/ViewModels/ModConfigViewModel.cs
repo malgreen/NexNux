@@ -100,7 +100,7 @@ public class ModConfigViewModel : ViewModelBase
         if (CurrentGame == null) return;
         ModArchivePath = archivePath;
         ModName = Path.GetFileNameWithoutExtension(archivePath);
-        string extractionPath = Path.Join(CurrentGame.ModDirectory, "__installcache");
+        string extractionPath = Path.Combine(CurrentGame.ModSettingsDirectory, "__installcache");
         await ExtractArchiveAsync(ModArchivePath, extractionPath);
         await UpdateExtractedFiles(extractionPath);
     }
