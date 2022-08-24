@@ -129,11 +129,18 @@ public class ModConfigViewModel : ViewModelBase
                     if (!reader.Entry.IsDirectory)
                     {
                         ExtractionProgress++;
-                        reader.WriteEntryToDirectory(outputPath, new ExtractionOptions()
+                        try
                         {
-                            ExtractFullPath = true,
-                            Overwrite = true
-                        });
+                            reader.WriteEntryToDirectory(outputPath, new ExtractionOptions()
+                            {
+                                ExtractFullPath = true,
+                                Overwrite = true
+                            });
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.WriteLine(e);
+                        }
                     }
                 });
             }
@@ -149,13 +156,20 @@ public class ModConfigViewModel : ViewModelBase
 
     private async Task UpdateExtractedFiles(string rootPath)
     {
-        ExtractedFiles = new ObservableCollection<IModItem>();
-        ModFolderItem rootItem = new ModFolderItem(rootPath);
-        CurrentRoot = rootItem;
-        rootItem.ItemName = "root";
-        rootItem.SubItems = GetSubItems(rootPath);
-        //ExtractedFiles.Add(rootItem);
-        ExtractedFiles = rootItem.SubItems; //TBD - should it also show the root folder, or just files within it?
+        try
+        {
+            ExtractedFiles = new ObservableCollection<IModItem>();
+            ModFolderItem rootItem = new ModFolderItem(rootPath);
+            CurrentRoot = rootItem;
+            rootItem.ItemName = "root";
+            rootItem.SubItems = GetSubItems(rootPath);
+            //ExtractedFiles.Add(rootItem);
+            ExtractedFiles = rootItem.SubItems; //TBD - should it also show the root folder, or just files within it?
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e);
+        }
     }
 
     private ObservableCollection<IModItem> GetSubItems(string itemPath)

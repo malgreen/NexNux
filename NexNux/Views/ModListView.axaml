@@ -33,7 +33,7 @@
 							CanUserSortColumns="False"
 							SelectedItem="{Binding SelectedMod, Mode=TwoWay}"
 							SelectionMode="Single"
-							AlternatingRowBackground="LightGray"
+							AlternatingRowBackground="{DynamicResource SystemRevealListLowColor}"
 							>
 					<DataGrid.Columns>
 						<DataGridTextColumn Header="Order" Binding="{Binding Index}" Width="1*" CanUserResize="False" IsReadOnly="True" />
