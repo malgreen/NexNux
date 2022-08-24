@@ -114,12 +114,20 @@ public class GameConfigViewModel : ViewModelBase
     void ValidateGameInput()
     {
         CanAddGame = false;
-        if (GameName.Equals(string.Empty))
+        if (string.IsNullOrWhiteSpace(GameName))
             StatusMessage = "❌ Game must have a name";
-        else if (DeployPath.Equals(string.Empty))
+        else if (GameName.StartsWith(" "))
+            StatusMessage = "❌ Game name cannot start with whitespace";
+        else if (GameName.StartsWith("."))
+            StatusMessage = "❌ Game name cannot start with \'.\'";
+        else if (string.IsNullOrWhiteSpace(DeployPath))
             StatusMessage = "❌ Game must have a deploy directory";
-        else if (ModsPath.Equals(string.Empty))
+        else if (string.IsNullOrWhiteSpace(ModsPath))
             StatusMessage = "❌ Game must have a mods directory";
+        else if (!Directory.Exists(DeployPath))
+            StatusMessage = "❌ Deploy directory does not exist";
+        else if (!Directory.Exists(ModsPath))
+            StatusMessage = "❌ Mods directory does not exist";
         else if (!Equals(Path.GetPathRoot(DeployPath), Path.GetPathRoot(ModsPath)))
             StatusMessage = "❌ Directories must reside on the same drive";
         else if (Directory.EnumerateFileSystemEntries(ModsPath).Any()) // This makes it so the editing a game no longer works

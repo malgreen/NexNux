@@ -24,6 +24,8 @@ public class ModConfigViewModel : ViewModelBase
         SetSelectionToClipboardCommand = ReactiveCommand.CreateFromTask(SetSelectionToClipboard);
         InstallModCommand = ReactiveCommand.CreateFromTask(InstallMod);
         CancelCommand = ReactiveCommand.CreateFromTask(Cancel);
+
+        this.WhenAnyValue(x => x.ModName).Subscribe(x => ValidateModInput());
     }
 
     private Game _currentGame;
@@ -89,6 +91,22 @@ public class ModConfigViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _currentRoot, value);
     }
 
+    private bool _canInstall;
+    public bool CanInstall
+    {
+        get => _canInstall;
+        set => this.RaiseAndSetIfChanged(ref _canInstall, value);
+    }
+
+    private string _statusMessage;
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
+    }
+
+
+
     public ReactiveCommand<Unit, Unit> SetSelectionToRootCommand { get; set; }
     public ReactiveCommand<Unit, Unit> SetSelectionToClipboardCommand { get; set; }
     public ReactiveCommand<Unit, Mod?> InstallModCommand { get; }
@@ -103,6 +121,7 @@ public class ModConfigViewModel : ViewModelBase
         string extractionPath = Path.Combine(CurrentGame.ModSettingsDirectory, "__installcache");
         await ExtractArchiveAsync(ModArchivePath, extractionPath);
         await UpdateExtractedFiles(extractionPath);
+        ValidateModInput();
     }
 
     private async Task ExtractArchiveAsync(string inputPath, string outputPath)
@@ -110,6 +129,7 @@ public class ModConfigViewModel : ViewModelBase
         if (Directory.Exists(outputPath))
             Directory.Delete(outputPath, true);
         Directory.CreateDirectory(outputPath);
+        StatusMessage = "Extracting...";
         IsExtracting = true;
         ExtractionProgress = 0;
         // TODO: Currently extraction progress is just number of entries in the archive, and is updated with 1 each time an entry is extracted
@@ -233,5 +253,23 @@ public class ModConfigViewModel : ViewModelBase
     public async Task<Mod?> Cancel()
     {
         return null; //There is null-checking in the modlistviewmodel
+    }
+
+    private void ValidateModInput()
+    {
+        CanInstall = false;
+        if (String.IsNullOrWhiteSpace(ModName))
+            StatusMessage = "❌ Mod must have a name";
+        else if (ModName.StartsWith("."))
+            StatusMessage = "❌ Mod name cannot start with \'.\' ";
+        else if (ModName.StartsWith(" "))
+            StatusMessage = "❌ Mod name cannot start with whitespace";
+        else if (ModName.Length > 50)
+            StatusMessage = "❌ Mod name is too long";
+        else
+        {
+            StatusMessage = "✅ Looks good";
+            CanInstall = true;
+        }
     }
 }

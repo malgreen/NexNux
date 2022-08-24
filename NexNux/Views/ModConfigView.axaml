@@ -60,12 +60,12 @@
           </Border>
           
           <Border Grid.Column="1" Grid.Row="2">
-              <Label IsVisible="{Binding IsExtracting}" HorizontalAlignment="Center" VerticalAlignment="Center">Extracting...</Label>
+              <Label Content="{Binding StatusMessage}" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
           </Border>
 
           <Border Grid.Column="1" Grid.Row="3" Padding="10">
               <StackPanel  Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                  <Button Command="{Binding InstallModCommand}" IsVisible="{Binding !IsExtracting}" IsEnabled="{Binding ModName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">Install</Button>
+                  <Button Command="{Binding InstallModCommand}" IsVisible="{Binding !IsExtracting}" IsEnabled="{Binding CanInstall}">Install</Button>
                   <Button Command="{Binding CancelCommand}">Cancel</Button>
               </StackPanel>
           </Border>
