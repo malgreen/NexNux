@@ -105,7 +105,7 @@ public class ModConfigViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
     }
 
-
+    private IReader? _archiveReader;
 
     public ReactiveCommand<Unit, Unit> SetSelectionToRootCommand { get; set; }
     public ReactiveCommand<Unit, Unit> SetSelectionToClipboardCommand { get; set; }
@@ -140,18 +140,18 @@ public class ModConfigViewModel : ViewModelBase
             await using Stream stream = File.OpenRead(inputPath);
             using IArchive archive = ArchiveFactory.Open(stream); //We have to use archive->reader, because ReaderFactory does not support Rar archives
             ArchiveSize = archive.Entries.Count(d => !d.IsDirectory); //Used in view
-            using IReader? reader = archive.ExtractAllEntries();
-
-            while (reader.MoveToNextEntry())
+            _archiveReader = archive.ExtractAllEntries();
+            
+            while (_archiveReader.MoveToNextEntry())
             {
                 await Task.Run(() =>
                 {
-                    if (!reader.Entry.IsDirectory)
+                    if (!_archiveReader.Entry.IsDirectory)
                     {
                         ExtractionProgress++;
                         try
                         {
-                            reader.WriteEntryToDirectory(outputPath, new ExtractionOptions()
+                            _archiveReader.WriteEntryToDirectory(outputPath, new ExtractionOptions()
                             {
                                 ExtractFullPath = true,
                                 Overwrite = true
@@ -252,6 +252,7 @@ public class ModConfigViewModel : ViewModelBase
 
     public async Task<Mod?> Cancel()
     {
+        _archiveReader?.Cancel();
         return null; //There is null-checking in the modlistviewmodel
     }
 

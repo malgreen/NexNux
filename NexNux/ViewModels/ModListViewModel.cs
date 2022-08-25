@@ -103,7 +103,7 @@ namespace NexNux.ViewModels
                 Mod mod = await ShowModInstallDialog.Handle(modConfigViewModel);
                 if (mod == null)
                 {
-                    if (Directory.Exists(installCacheDir)){ Directory.Delete(installCacheDir, true); }
+                    if (Directory.Exists(installCacheDir) && !modConfigViewModel.IsExtracting){ Directory.Delete(installCacheDir, true); }
                     return;
                 }
 
@@ -128,7 +128,7 @@ namespace NexNux.ViewModels
 
                     VisibleMods.Add(mod);
                 }
-                if (Directory.Exists(installCacheDir)){ Directory.Delete(installCacheDir, true); }
+                if (Directory.Exists(installCacheDir) && !modConfigViewModel.IsExtracting){ Directory.Delete(installCacheDir, true); }
             }
             catch (Exception e)
             {
