@@ -25,6 +25,8 @@ public class GameConfigViewModel : ViewModelBase
         ChooseDeployPathCommand = ReactiveCommand.CreateFromTask(ChooseDeployPath);
         ChooseModsPathCommand = ReactiveCommand.CreateFromTask(ChooseModsPath);
         ShowErrorDialog = new Interaction<string, string>();
+        ShowDeployFolderDialog = new Interaction<Unit, string>();
+        ShowModsFolderDialog = new Interaction<Unit, string>();
         
         CanAddGame = false;
         StatusMessage = string.Empty;
@@ -74,9 +76,11 @@ public class GameConfigViewModel : ViewModelBase
     }
 
     public ReactiveCommand<Unit, Game?> SaveGameCommand { get; }
-    public ReactiveCommand<Unit, string> ChooseDeployPathCommand { get; }
-    public ReactiveCommand<Unit, string> ChooseModsPathCommand { get; }
+    public ReactiveCommand<Unit, Unit> ChooseDeployPathCommand { get; }
+    public ReactiveCommand<Unit, Unit> ChooseModsPathCommand { get; }
     public Interaction<string, string> ShowErrorDialog { get; } 
+    public Interaction<Unit, string> ShowDeployFolderDialog { get; }
+    public Interaction<Unit, string> ShowModsFolderDialog { get; }
 
     public async Task<Game?> SaveGame()
     {
@@ -93,22 +97,14 @@ public class GameConfigViewModel : ViewModelBase
         }
     }
 
-    async Task<string> ChooseDeployPath()
+    async Task ChooseDeployPath()
     {
-        string path;
-        OpenFolderDialog folderDialog = new OpenFolderDialog();
-        path = await folderDialog.ShowAsync(new GameConfigView()) ?? string.Empty;
-        DeployPath = path;
-        return path;
+        DeployPath = await ShowDeployFolderDialog.Handle(Unit.Default);
     }
 
-    async Task<string> ChooseModsPath()
+    async Task ChooseModsPath()
     {
-        string path;
-        OpenFolderDialog folderDialog = new OpenFolderDialog();
-        path = await folderDialog.ShowAsync(new GameConfigView()) ?? string.Empty;
-        ModsPath = path;
-        return path;
+        ModsPath = await ShowModsFolderDialog.Handle(Unit.Default);
     }
 
     void ValidateGameInput()

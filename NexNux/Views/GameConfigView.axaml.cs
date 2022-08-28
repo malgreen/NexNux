@@ -22,6 +22,8 @@ namespace NexNux.Views
             //this.WhenActivated(b => b(ViewModel!.CancelCommand.Subscribe(Close)));
             this.WhenActivated(d => d(ViewModel!.SaveGameCommand.Subscribe(Close)));
             this.WhenActivated(d => d(ViewModel!.ShowErrorDialog.RegisterHandler(DoShowErrorDialogAsync)));
+            this.WhenActivated(d => d(ViewModel!.ShowDeployFolderDialog.RegisterHandler(DoShowDeployFolderDialog)));
+            this.WhenActivated(d => d(ViewModel!.ShowModsFolderDialog.RegisterHandler(DoShowModsFolderDialog)));
 #if DEBUG
             this.AttachDevTools();
 #endif
@@ -37,6 +39,20 @@ namespace NexNux.Views
             var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", interactionContext.Input, ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Warning);
             await messageBox.ShowDialog(this);
             interactionContext.SetOutput(""); // This has to be here, otherwise ReactiveUI is not happy, so maybe this should not be an interaction at all?
+        }
+
+        private async Task DoShowDeployFolderDialog(InteractionContext<Unit, string> interactionContext)
+        {
+            OpenFolderDialog openFolderDialog = new OpenFolderDialog();
+            openFolderDialog.Title = "Choose deploy folder";
+            interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
+        }
+
+        private async Task DoShowModsFolderDialog(InteractionContext<Unit, string> interactionContext)
+        {
+            OpenFolderDialog openFolderDialog = new OpenFolderDialog();
+            openFolderDialog.Title = "Choose mods folder";
+            interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
         }
 
         private void Cancel_OnClick(object? sender, RoutedEventArgs e)

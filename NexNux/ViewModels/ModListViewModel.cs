@@ -218,6 +218,7 @@ namespace NexNux.ViewModels
         }
         private void MoveExtractedFiles(string source, string target)
         {
+            Directory.CreateDirectory(target); // Without this, there is an exception when installing empty files
             // Taken from https://stackoverflow.com/a/2553245
 
             var sourcePath = source;

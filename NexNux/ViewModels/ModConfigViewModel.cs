@@ -149,6 +149,7 @@ public class ModConfigViewModel : ViewModelBase
                     if (!_archiveReader.Entry.IsDirectory)
                     {
                         ExtractionProgress++;
+                        StatusMessage = "Extracting " + _archiveReader.Entry.ToString();
                         try
                         {
                             _archiveReader.WriteEntryToDirectory(outputPath, new ExtractionOptions()

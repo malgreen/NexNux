@@ -15,7 +15,7 @@
 	<DockPanel>
 		<Grid>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="1*"/>
+				<ColumnDefinition Width="3*"/>
 				<ColumnDefinition Width="1*" />
 			</Grid.ColumnDefinitions>
 			<Grid.RowDefinitions>
