@@ -37,7 +37,7 @@
 				</MenuItem>
 			</Menu>
 			
-			<Border Grid.Column="0" Grid.Row="1" Margin="20" CornerRadius="3" BoxShadow="0 0 1 2 Gray">
+			<Border Grid.Column="0" Grid.Row="1" Margin="20, 10, 10, 10" CornerRadius="3" BoxShadow="0 0 0 3 Gray">
 				<Canvas Name="GridModsCanvas" Width="{Binding $parent[Border].Bounds.Width}" Height="{Binding $parent[Border].Bounds.Height}">
 					<DataGrid   Name="GridMods"
 								Background="Transparent"
@@ -71,10 +71,10 @@
 				</Canvas>
 			</Border>
 			
-			<Border Grid.Column="0" Grid.Row="2" Margin="10">
+			<Border Grid.Column="0" Grid.Row="2" Margin="20, 10, 10, 10">
 				<DockPanel>
 					<Button Command="{Binding InstallModCommand}" DockPanel.Dock="Left" HorizontalAlignment="Right">Install new mod</Button>
-					<Button Command="{Binding UninstallModCommand}" DockPanel.Dock="Right" HorizontalAlignment="Right">Uninstall mod</Button>
+					<Button Command="{Binding UninstallModCommand}" IsEnabled="{Binding SelectedMod, Converter={x:Static ObjectConverters.IsNotNull}}" DockPanel.Dock="Right" HorizontalAlignment="Right">Uninstall mod</Button>
 				</DockPanel>
 			</Border>
 		

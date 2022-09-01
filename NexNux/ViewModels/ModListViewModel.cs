@@ -144,6 +144,7 @@ namespace NexNux.ViewModels
 
         async void UninstallMod()
         {
+            if (SelectedMod == null) return;
             try
             {
                 bool result = await ShowModUninstallDialog.Handle(SelectedMod);

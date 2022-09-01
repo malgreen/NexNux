@@ -212,7 +212,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             ButtonEnum.OkCancel,
             MessageBox.Avalonia.Enums.Icon.Warning
         );
-        var result = await messageBox.Show(this);
+        var result = await messageBox.ShowDialog(this);
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
@@ -224,7 +224,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             ButtonEnum.OkCancel,
             MessageBox.Avalonia.Enums.Icon.Info
         );
-        var result = await messageBox.Show(this);
+        var result = await messageBox.ShowDialog(this);
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
