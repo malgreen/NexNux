@@ -27,12 +27,14 @@ namespace NexNux.ViewModels
             ShowModUninstallDialog = new Interaction<Mod, bool>();
             ShowErrorDialog = new Interaction<string, bool>();
             ShowModExistsDialog = new Interaction<Mod, bool>();
+            ShowGameList = new Interaction<Unit, Unit>();
 
             VisibleMods = new ObservableCollection<Mod>();
             VisibleMods.CollectionChanged += UpdateModList;
 
             InstallModCommand = ReactiveCommand.Create(InstallMod);
             UninstallModCommand = ReactiveCommand.Create(UninstallMod);
+            ChangeGameCommand = ReactiveCommand.Create(ChangeGame);
 
             this.WhenAnyValue(x => x.SelectedMod).Subscribe(x => UpdateModInfo());            
         }
@@ -74,10 +76,12 @@ namespace NexNux.ViewModels
 
         public ReactiveCommand<Unit, Unit> InstallModCommand { get; }
         public ReactiveCommand<Unit, Unit> UninstallModCommand { get; }
+        public ReactiveCommand<Unit, Unit> ChangeGameCommand { get; }
         public Interaction<ModConfigViewModel, Mod?> ShowModInstallDialog { get; }
         public Interaction<Mod, bool> ShowModUninstallDialog { get; }
         public Interaction<string, bool> ShowErrorDialog { get; }
         public Interaction<Mod, bool> ShowModExistsDialog { get; }
+        public Interaction<Unit, Unit> ShowGameList { get; }
 
 
         public void UpdateCurrentGame(Game game)
@@ -235,6 +239,17 @@ namespace NexNux.ViewModels
                     if (File.Exists(targetFile)) File.Delete(targetFile);
                     File.Move(file, targetFile);
                 }
+            }
+        }
+        private async void ChangeGame()
+        {
+            try
+            {
+                await ShowGameList.Handle(Unit.Default);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
             }
         }
     }

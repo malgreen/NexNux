@@ -6,32 +6,58 @@
         MinWidth="400" MinHeight="450"
         Width="400" Height="450"
         x:Class="NexNux.Views.GameListView"
-        Title="GameListView">
+        Title="GameListView"
+		ExtendClientAreaToDecorationsHint="True">
 
 
-  <DockPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+  <DockPanel>
+	  <Grid>
+		  <Grid.ColumnDefinitions>
+			  <ColumnDefinition Width="1*"/>
+			  <ColumnDefinition Width="5*"/>
+			  <ColumnDefinition Width="1*"/>
+		  </Grid.ColumnDefinitions>
+		  <Grid.RowDefinitions>
+			  <RowDefinition Height="40"/>
+			  <RowDefinition Height="75"/>
+			  <RowDefinition Height="1*"/>
+			  <RowDefinition Height="75"/>
+		  </Grid.RowDefinitions>
 
-      <Border Padding="0, 20, 0, 10" DockPanel.Dock="Top">
-        <StackPanel Orientation="Horizontal" Spacing="40">
-          <Button Command="{Binding AddGameCommand}" Width="120" HorizontalContentAlignment="Center">Add Game</Button>
-          <Button Command="{Binding RemoveGameCommand}" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Remove Game</Button>
-        </StackPanel>
-      </Border>
+		  <Menu DockPanel.Dock="Top" Grid.ColumnSpan="3" HorizontalAlignment="Left" VerticalAlignment="Center">
+			  <Image Source="avares://NexNux/Assets/avalonia-logo.ico"/>
+			  <MenuItem Header="_File">
+				  <MenuItem Header="_Add game" Command="{Binding AddGameCommand}"/>
+			  </MenuItem>
+			  <MenuItem Header="_Options">
+				  <MenuItem Header="_Theme" IsEnabled="False"/>
+			  </MenuItem>
+		  </Menu>
+		  
+          <Border Padding="5" DockPanel.Dock="Top" Grid.Column="1" Grid.Row="1">
+			  <DockPanel HorizontalAlignment="Stretch">
+				  <Button Command="{Binding AddGameCommand}" DockPanel.Dock="Left" Width="120" HorizontalContentAlignment="Center">Add Game</Button>
+				  <Button Command="{Binding RemoveGameCommand}" HorizontalAlignment="Right" DockPanel.Dock="Right" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Remove Game</Button>
+			  </DockPanel>
+          </Border>
 
-      <Border DockPanel.Dock="Top">
-		  <ListBox Items="{Binding Games}" Height="300"
-                   SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
-				   >
+          <Border Padding="5" DockPanel.Dock="Top" Grid.Column="1" Grid.Row="2">
+		      <ListBox Items="{Binding Games}"
+                       SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
+				       >
 
-		  </ListBox>
-      </Border>
+		      </ListBox>
+          </Border>
 
-      <Border Padding="0, 10, 0, 20" DockPanel.Dock="Bottom">
-          <StackPanel Orientation="Horizontal"  Spacing="40">
-              <Button Command="{Binding ChooseGameCommand}" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Choose Game</Button>
-              <Button Command="{Binding EditGameCommand}" IsEnabled="False" Width="120" HorizontalContentAlignment="Center">Edit Game</Button>
-          </StackPanel>
-      </Border>
+          <Border Padding="5" DockPanel.Dock="Bottom" Grid.Column="1" Grid.Row="3">
+			  <DockPanel HorizontalAlignment="Stretch">
+                  <Button Command="{Binding ChooseGameCommand}" DockPanel.Dock="Left" IsEnabled="{Binding SelectedGame, Converter={x:Static ObjectConverters.IsNotNull}}" Width="120" HorizontalContentAlignment="Center">Choose Game</Button>
+                  <Button Command="{Binding EditGameCommand}" HorizontalAlignment="Right" DockPanel.Dock="Right" IsEnabled="False" Width="120" HorizontalContentAlignment="Center">Edit Game</Button>
+			  </DockPanel>
+          </Border>
+		  
+	  </Grid>
+
 
   </DockPanel>
 </Window>

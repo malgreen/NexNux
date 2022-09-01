@@ -20,6 +20,8 @@ using Avalonia.Controls.Generators;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using System.Diagnostics;
+using System.Reactive;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace NexNux.Views;
 
@@ -34,6 +36,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
         this.WhenActivated(d => d(ViewModel!.ShowModUninstallDialog.RegisterHandler(DoShowModUninstallDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowErrorDialog.RegisterHandler(DoShowErrorDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowModExistsDialog.RegisterHandler(DoShowModExistsDialogAsync)));
+        this.WhenActivated(d => d(ViewModel!.ShowGameList.RegisterHandler(DoShowGameList)));
         SetupGridHandlers();
 #if DEBUG
         this.AttachDevTools();
@@ -259,6 +262,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             Stroke = Brushes.Gray,
             StrokeThickness = 1
         };
+        line.IsEnabled = false; // So we can't drop on the actual indicator
         this.GetControl<Canvas>("GridModsCanvas").Children.Add(line);
     }
 
@@ -271,5 +275,18 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
         {
             this.GetControl<Canvas>("GridModsCanvas").Children.Remove(existingLine);
         }
+    }
+
+    private async Task DoShowGameList(InteractionContext<Unit, Unit> interactionContext)
+    {
+        GameListViewModel viewModel = new GameListViewModel();
+        GameListView gameListView = new GameListView();
+        gameListView.DataContext = viewModel;
+        gameListView.Show();
+        if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+        {
+            lifetime.MainWindow = gameListView;
+        }
+        this.Close();
     }
 }
