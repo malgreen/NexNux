@@ -12,9 +12,12 @@ using System.ComponentModel;
 using System.Collections;
 using System.IO;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using NexNux.Models;
+using NexNux.Utilities.ModDeployment;
 using NexNux.Views;
 
 namespace NexNux.ViewModels
@@ -28,6 +31,8 @@ namespace NexNux.ViewModels
             ShowErrorDialog = new Interaction<string, bool>();
             ShowModExistsDialog = new Interaction<Mod, bool>();
             ShowGameList = new Interaction<Unit, Unit>();
+            IsDeployed = true; // This could also be false to start off with
+            UpdateDeploymentStatus();
 
             VisibleMods = new ObservableCollection<Mod>();
             VisibleMods.CollectionChanged += UpdateModList;
@@ -35,8 +40,11 @@ namespace NexNux.ViewModels
             InstallModCommand = ReactiveCommand.Create(InstallMod);
             UninstallModCommand = ReactiveCommand.Create(UninstallMod);
             ChangeGameCommand = ReactiveCommand.Create(ChangeGame);
+            DeployModsCommand = ReactiveCommand.Create(DeployMods);
+            ClearModsCommand = ReactiveCommand.Create(ClearMods);
 
-            this.WhenAnyValue(x => x.SelectedMod).Subscribe(x => UpdateModInfo());            
+            this.WhenAnyValue(x => x.SelectedMod).Subscribe(x => UpdateModInfo());
+            this.WhenAnyValue(x => x.IsDeployed).Subscribe(x => UpdateDeploymentStatus());
         }
 
         private Game _currentGame = null!;
@@ -74,9 +82,25 @@ namespace NexNux.ViewModels
             set => this.RaiseAndSetIfChanged(ref _modInfo, value);
         }
 
+        private bool _isDeployed;
+        public bool IsDeployed
+        {
+            get => _isDeployed;
+            set => this.RaiseAndSetIfChanged(ref _isDeployed, value);
+        }
+
+        private string _deploymentStatus = null!;
+        public string DeploymentStatus
+        {
+            get => _deploymentStatus;
+            set => this.RaiseAndSetIfChanged(ref _deploymentStatus, value);
+        }
+
         public ReactiveCommand<Unit, Unit> InstallModCommand { get; }
         public ReactiveCommand<Unit, Unit> UninstallModCommand { get; }
         public ReactiveCommand<Unit, Unit> ChangeGameCommand { get; }
+        public ReactiveCommand<Unit, Unit> DeployModsCommand { get; }
+        public ReactiveCommand<Unit, Unit> ClearModsCommand { get; }
         public Interaction<ModConfigViewModel, Mod?> ShowModInstallDialog { get; }
         public Interaction<Mod, bool> ShowModUninstallDialog { get; }
         public Interaction<string, bool> ShowErrorDialog { get; }
@@ -214,6 +238,7 @@ namespace NexNux.ViewModels
         {
             UpdateModInfo();
             SaveVisibleList();
+            IsDeployed = false;
         }
 
         private void SaveVisibleList()
@@ -251,6 +276,50 @@ namespace NexNux.ViewModels
             catch (Exception e)
             {
                 Debug.WriteLine(e.StackTrace);
+                await ShowErrorDialog.Handle(e.Message);
+            }
+        }
+
+        private async void DeployMods()
+        {
+            try
+            {
+                IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
+                modDeployer.Deploy(CurrentModList.GetActiveMods());
+                IsDeployed = true;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+                IsDeployed = false;
+                await ShowErrorDialog.Handle(e.Message);
+            }
+        }
+
+        private async void ClearMods()
+        {
+            try
+            {
+                IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
+                modDeployer.Clear();
+                IsDeployed = false;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+                await ShowErrorDialog.Handle(e.Message);
+            }
+        }
+
+        private void UpdateDeploymentStatus()
+        {
+            if (IsDeployed)
+            {
+                DeploymentStatus = "✅ Mods deployed ✅";
+            }
+            else
+            {
+                DeploymentStatus = "❌ Deployment needed ❌";
             }
         }
     }

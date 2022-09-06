@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 namespace NexNux.Models;
@@ -67,6 +68,11 @@ public class ModList
         {
             Debug.WriteLine(ex.StackTrace);
         }
+    }
+
+    public List<Mod> GetActiveMods()
+    {
+        return new List<Mod>(Mods.Where(d => d.Enabled));
     }
 
     public void InstallMod(Mod mod, string rootPath)

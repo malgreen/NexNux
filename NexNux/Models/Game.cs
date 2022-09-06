@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace NexNux.Models;
 
@@ -47,7 +48,7 @@ public class Game
 
     public List<Mod> GetActiveMods()
     {
-        throw new NotImplementedException();
+        return new List<Mod>(_modList.Mods.Where(d => d.Enabled));
     }
 
     /// <summary>
