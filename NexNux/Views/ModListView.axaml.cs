@@ -184,7 +184,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             {
                 new FileDialogFilter()
                 {
-                    Extensions = new List<string> {"zip", "rar", "7z", "tar", "gzip"}
+                    Extensions = new List<string> {"zip", "rar", "7z", "gzip"} // tar support removed
                 }
             }
         };

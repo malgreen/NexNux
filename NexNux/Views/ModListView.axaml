@@ -43,7 +43,7 @@
 				<MenuItem Header="{Binding CurrentGame}" Foreground="{DynamicResource AccentButtonForeground}" Background="{DynamicResource AccentButtonBackgroundPressed}" IsHitTestVisible="False" Margin="40, 0, 0, 0" />
       </Menu>
 			
-			<Border Grid.Column="0" Grid.Row="1" Margin="20, 10, 10, 10" CornerRadius="3" BoxShadow="0 0 0 3 Gray">
+			<Border Grid.Column="0" Grid.Row="1" Margin="20, 10, 10, 10" CornerRadius="3" BoxShadow="0 0 0 1 Black">
 				<Canvas Name="GridModsCanvas" Width="{Binding $parent[Border].Bounds.Width}" Height="{Binding $parent[Border].Bounds.Height}">
 					<DataGrid   Name="GridMods"
 								Background="Transparent"
@@ -59,7 +59,12 @@
 								Height="{Binding $parent[Border].Bounds.Height}"
                 >
 						<DataGrid.Styles>
-							<Style Selector="DataGridCell:current /template/ Grid#FocusVisual">
+              <Style Selector="DataGridColumnHeader">
+                  <Setter Property="IsHitTestVisible" Value="False" />
+									<Setter Property="Background" Value="Transparent" />
+									<Setter Property="DragDrop.AllowDrop" Value="False" />
+              </Style>
+              <Style Selector="DataGridCell:current /template/ Grid#FocusVisual">
 								<Setter Property="IsVisible" Value="False"/>
 							</Style>
 						</DataGrid.Styles>

@@ -106,6 +106,7 @@ namespace NexNux.ViewModels
         public Interaction<string, bool> ShowErrorDialog { get; }
         public Interaction<Mod, bool> ShowModExistsDialog { get; }
         public Interaction<Unit, Unit> ShowGameList { get; }
+        public Interaction<Unit, Unit> ShowDeployProgress { get; }
 
 
         public void UpdateCurrentGame(Game game)
@@ -276,7 +277,6 @@ namespace NexNux.ViewModels
             catch (Exception e)
             {
                 Debug.WriteLine(e.StackTrace);
-                await ShowErrorDialog.Handle(e.Message);
             }
         }
 
