@@ -32,6 +32,7 @@ namespace NexNux.ViewModels
             ShowModExistsDialog = new Interaction<Mod, bool>();
             ShowGameList = new Interaction<Unit, Unit>();
             IsDeployed = true; // This could also be false to start off with
+            DeploymentTotal = 1;
             UpdateDeploymentStatus();
 
             VisibleMods = new ObservableCollection<Mod>();
@@ -96,6 +97,20 @@ namespace NexNux.ViewModels
             set => this.RaiseAndSetIfChanged(ref _deploymentStatus, value);
         }
 
+        private double _deploymentProgress;
+        public double DeploymentProgress
+        {
+            get => _deploymentProgress;
+            set => this.RaiseAndSetIfChanged(ref _deploymentProgress, value);
+        }
+
+        private double _deploymentTotal;
+        public double DeploymentTotal
+        {
+            get => _deploymentTotal;
+            set => this.RaiseAndSetIfChanged(ref _deploymentTotal, value);
+        }
+
         public ReactiveCommand<Unit, Unit> InstallModCommand { get; }
         public ReactiveCommand<Unit, Unit> UninstallModCommand { get; }
         public ReactiveCommand<Unit, Unit> ChangeGameCommand { get; }
@@ -106,7 +121,6 @@ namespace NexNux.ViewModels
         public Interaction<string, bool> ShowErrorDialog { get; }
         public Interaction<Mod, bool> ShowModExistsDialog { get; }
         public Interaction<Unit, Unit> ShowGameList { get; }
-        public Interaction<Unit, Unit> ShowDeployProgress { get; }
 
 
         public void UpdateCurrentGame(Game game)
@@ -284,9 +298,12 @@ namespace NexNux.ViewModels
         {
             try
             {
+                DeploymentTotal = GetFileAmount(CurrentModList.GetActiveMods());
                 IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
-                modDeployer.Deploy(CurrentModList.GetActiveMods());
+                modDeployer.FileDeployed += ModDeployer_FileDeployed;
+                await Task.Run(() => modDeployer.Deploy(CurrentModList.GetActiveMods()));
                 IsDeployed = true;
+                DeploymentProgress = 0;
             }
             catch (Exception e)
             {
@@ -294,6 +311,11 @@ namespace NexNux.ViewModels
                 IsDeployed = false;
                 await ShowErrorDialog.Handle(e.Message);
             }
+        }
+
+        private void ModDeployer_FileDeployed(object? sender, FileDeployedArgs e)
+        {
+            DeploymentProgress = e.Progress;
         }
 
         private async void ClearMods()
@@ -321,6 +343,19 @@ namespace NexNux.ViewModels
             {
                 DeploymentStatus = "❌ Deployment needed ❌";
             }
+        }
+        private double GetFileAmount(List<Mod> mods)
+        {
+            int amount = 0;
+            foreach (Mod mod in mods)
+            {
+                DirectoryInfo dir = new DirectoryInfo(mod.ModPath);
+                foreach (FileInfo file in dir.GetFiles("*", SearchOption.AllDirectories))
+                {
+                    amount++;
+                }
+            }
+            return amount;
         }
     }
 }

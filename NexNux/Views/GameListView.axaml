@@ -25,7 +25,11 @@
 		  </Grid.RowDefinitions>
 
 		  <Menu DockPanel.Dock="Top" Grid.ColumnSpan="3" HorizontalAlignment="Left" VerticalAlignment="Center">
-			  <Image Source="avares://NexNux/Assets/avalonia-logo.ico"/>
+        <MenuItem IsHitTestVisible="False">
+					<MenuItem.Header>
+            <Image Source="avares://NexNux/Assets/avalonia-logo.ico"/>
+          </MenuItem.Header>
+        </MenuItem>
 			  <MenuItem Header="_File">
 				  <MenuItem Header="_Add game" Command="{Binding AddGameCommand}"/>
 			  </MenuItem>

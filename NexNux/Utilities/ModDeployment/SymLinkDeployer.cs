@@ -23,6 +23,8 @@ public class SymLinkDeployer : IModDeployer
 
         Directory.CreateDirectory(_cachePath);
     }
+
+    public event EventHandler<FileDeployedArgs>? FileDeployed;
     public Game CurrentGame { get; }
     private readonly string _deployPath;
     private readonly string _cachePath;
@@ -34,13 +36,14 @@ public class SymLinkDeployer : IModDeployer
     /// Deploys given list of files to the deployer's game's 'deploy' folder
     /// </summary>
     /// <param name="mods"></param>
-    public void Deploy(List<Mod> mods)
+    public Task Deploy(List<Mod> mods)
     {
         CheckAppPrivilege();
         LoadLinkedMods();
         RestoreCache();
         LinkMods(mods);
         SaveLinkedMods();
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -73,19 +76,24 @@ public class SymLinkDeployer : IModDeployer
         _deployedFiles = new List<string>();
     }
 
-    private async void LinkMods(List<Mod> mods)
+    private void LinkMods(List<Mod> mods)
     {
+        double fileNumber = 0;
         foreach (Mod mod in mods)
         {
             DirectoryInfo modDir = new DirectoryInfo(mod.ModPath);
             foreach (FileInfo file in modDir.GetFiles("*", SearchOption.AllDirectories))
             {
                 LinkFile(file, modDir);
+                FileDeployedArgs args = new FileDeployedArgs();
+                args.Progress = fileNumber;
+                OnFileLinked(args);
+                fileNumber++;
             }
         }
     }
 
-    private async Task LinkFile(FileInfo file, DirectoryInfo modDir)
+    private void LinkFile(FileInfo file, DirectoryInfo modDir)
     {
         string subPath = Path.GetRelativePath(modDir.FullName, file.FullName); // to remove the mods directory + mod name
         string finalPath = Path.Combine(_deployPath, subPath); // final path to deploy to, including file name
@@ -108,7 +116,7 @@ public class SymLinkDeployer : IModDeployer
         Directory.CreateDirectory(Path.GetDirectoryName(finalPath));
         File.CreateSymbolicLink(finalPath, file.FullName);
         _deployedFiles.Add(finalPath);
-}
+    }
 
     private void SaveLinkedMods()
     {
@@ -147,5 +155,12 @@ public class SymLinkDeployer : IModDeployer
         //{
         //    throw new InvalidOperationException($"Application must be run as root/sudo. From terminal, run the executable as 'sudo {name}'");
         //}
+    }
+
+    protected virtual void OnFileLinked(FileDeployedArgs e)
+    {
+        EventHandler<FileDeployedArgs> handler = FileDeployed;
+        if (handler == null) return;
+        handler(this, e);
     }
 }
