@@ -41,14 +41,14 @@ public class Game
         ModListFile = Path.Combine(ModSettingsDirectory, "ModList.json");
     }
 
-    public List<Mod> GetAllMods()
+    public List<Mod?> GetAllMods()
     {
         return _modList.Mods;
     }
 
-    public List<Mod> GetActiveMods()
+    public List<Mod?> GetActiveMods()
     {
-        return new List<Mod>(_modList.Mods.Where(d => d.Enabled));
+        return new List<Mod?>(_modList.Mods.Where(d => d.Enabled));
     }
 
     /// <summary>

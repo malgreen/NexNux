@@ -15,7 +15,7 @@ public class ModList
         Mods = LoadList();
     }
 
-    public List<Mod> Mods { get; set; }
+    public List<Mod?> Mods { get; set; }
     private string _modListFileName;
 
     public void SaveList()
@@ -33,9 +33,9 @@ public class ModList
         }
     }
 
-    public List<Mod> LoadList()
+    public List<Mod?> LoadList()
     {
-        List<Mod> loadedMods = new List<Mod>();
+        List<Mod?> loadedMods = new List<Mod?>();
         try
         {
             string jsonString = File.ReadAllText(_modListFileName);
@@ -45,7 +45,7 @@ public class ModList
         catch (FileNotFoundException ex)
         {
             Debug.WriteLine(ex);
-            Mods = new List<Mod>();
+            Mods = new List<Mod?>();
             SaveList();
             LoadList();
         }
@@ -70,9 +70,9 @@ public class ModList
         }
     }
 
-    public List<Mod> GetActiveMods()
+    public List<Mod?> GetActiveMods()
     {
-        return new List<Mod>(Mods.Where(d => d.Enabled));
+        return new List<Mod?>(Mods.Where(d => d.Enabled));
     }
 
     public void InstallMod(Mod mod, string rootPath)

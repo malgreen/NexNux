@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Xaml.Interactions.DragAndDrop;
 using ReactiveUI;
 using System.Reactive;
 using System.Diagnostics;
@@ -12,13 +10,8 @@ using System.ComponentModel;
 using System.Collections;
 using System.IO;
 using System.Reactive.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using NexNux.Models;
 using NexNux.Utilities.ModDeployment;
-using NexNux.Views;
 
 namespace NexNux.ViewModels
 {
@@ -29,13 +22,13 @@ namespace NexNux.ViewModels
             ShowModInstallDialog = new Interaction<ModConfigViewModel, Mod?>();
             ShowModUninstallDialog = new Interaction<Mod, bool>();
             ShowErrorDialog = new Interaction<string, bool>();
-            ShowModExistsDialog = new Interaction<Mod, bool>();
+            ShowModExistsDialog = new Interaction<Mod?, bool>();
             ShowGameList = new Interaction<Unit, Unit>();
             IsDeployed = true; // This could also be false to start off with
             DeploymentTotal = 1;
             UpdateDeploymentStatus();
 
-            VisibleMods = new ObservableCollection<Mod>();
+            VisibleMods = new ObservableCollection<Mod?>();
             VisibleMods.CollectionChanged += UpdateModList;
 
             InstallModCommand = ReactiveCommand.Create(InstallMod);
@@ -44,8 +37,9 @@ namespace NexNux.ViewModels
             DeployModsCommand = ReactiveCommand.Create(DeployMods);
             ClearModsCommand = ReactiveCommand.Create(ClearMods);
 
-            this.WhenAnyValue(x => x.SelectedMod).Subscribe(x => UpdateModInfo());
-            this.WhenAnyValue(x => x.IsDeployed).Subscribe(x => UpdateDeploymentStatus());
+            this.WhenAnyValue(x => x.SelectedMod).Subscribe(_ => UpdateModInfo());
+            this.WhenAnyValue(x => x.IsDeployed).Subscribe(_ => UpdateDeploymentStatus());
+            this.WhenAnyValue(x => x.IsDeploying).Subscribe(_ => UpdateDeploymentStatus());
         }
 
         private Game _currentGame = null!;
@@ -62,15 +56,15 @@ namespace NexNux.ViewModels
             set => this.RaiseAndSetIfChanged(ref _currentModList, value);
         }
 
-        private ObservableCollection<Mod> _visibleMods = null!;
-        public ObservableCollection<Mod> VisibleMods
+        private ObservableCollection<Mod?> _visibleMods = null!;
+        public ObservableCollection<Mod?> VisibleMods
         {
             get => _visibleMods;
             set => this.RaiseAndSetIfChanged(ref _visibleMods, value);
         }
 
-        private Mod _selectedMod = null!;
-        public Mod SelectedMod
+        private Mod? _selectedMod;
+        public Mod? SelectedMod
         {
             get => _selectedMod;
             set => this.RaiseAndSetIfChanged(ref _selectedMod, value);
@@ -88,6 +82,13 @@ namespace NexNux.ViewModels
         {
             get => _isDeployed;
             set => this.RaiseAndSetIfChanged(ref _isDeployed, value);
+        }
+
+        private bool _isDeploying;
+        public bool IsDeploying
+        {
+            get => _isDeploying;
+            set => this.RaiseAndSetIfChanged(ref _isDeploying, value);
         }
 
         private string _deploymentStatus = null!;
@@ -119,7 +120,7 @@ namespace NexNux.ViewModels
         public Interaction<ModConfigViewModel, Mod?> ShowModInstallDialog { get; }
         public Interaction<Mod, bool> ShowModUninstallDialog { get; }
         public Interaction<string, bool> ShowErrorDialog { get; }
-        public Interaction<Mod, bool> ShowModExistsDialog { get; }
+        public Interaction<Mod?, bool> ShowModExistsDialog { get; }
         public Interaction<Unit, Unit> ShowGameList { get; }
 
 
@@ -130,7 +131,7 @@ namespace NexNux.ViewModels
             string modListFile = CurrentGame.ModListFile;
             CurrentModList = new ModList(modListFile);
 
-            VisibleMods = new ObservableCollection<Mod>(CurrentModList.LoadList());
+            VisibleMods = new ObservableCollection<Mod?>(CurrentModList.LoadList());
             SetModListeners(VisibleMods, null!);
 
             VisibleMods.CollectionChanged += UpdateModList;
@@ -141,16 +142,18 @@ namespace NexNux.ViewModels
             try
             {
                 string installCacheDir = Path.Combine(CurrentGame.ModSettingsDirectory, "__installcache");
-                ModConfigViewModel modConfigViewModel = new ModConfigViewModel();
-                modConfigViewModel.CurrentGame = CurrentGame;
-                Mod mod = await ShowModInstallDialog.Handle(modConfigViewModel);
+                ModConfigViewModel modConfigViewModel = new ModConfigViewModel
+                {
+                    CurrentGame = CurrentGame
+                };
+                Mod? mod = await ShowModInstallDialog.Handle(modConfigViewModel);
                 if (mod == null)
                 {
                     if (Directory.Exists(installCacheDir) && !modConfigViewModel.IsExtracting){ Directory.Delete(installCacheDir, true); }
                     return;
                 }
 
-                Mod existingMod = VisibleMods.FirstOrDefault(item => item.ModName == mod.ModName);
+                Mod? existingMod = VisibleMods.FirstOrDefault(item => item?.ModName == mod.ModName);
                 string installedModPath = Path.Combine(CurrentGame.ModDirectory, mod.ModName);
 
                 if (existingMod != null)
@@ -222,7 +225,7 @@ namespace NexNux.ViewModels
 
         void UpdateModList(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            foreach(Mod mod in VisibleMods)
+            foreach(Mod? mod in VisibleMods)
             {
                 if (mod == null) continue;
                 mod.Index = VisibleMods.IndexOf(mod);
@@ -231,7 +234,7 @@ namespace NexNux.ViewModels
             SaveVisibleList();
         }
 
-        private void SetModListeners(IList newItems, IList oldItems)
+        private void SetModListeners(IList? newItems, IList? oldItems)
         {
             if (newItems != null)
             {
@@ -272,7 +275,8 @@ namespace NexNux.ViewModels
                 .GroupBy(s => Path.GetDirectoryName(s));
             foreach (var folder in files)
             {
-                var targetFolder = folder.Key.Replace(sourcePath, targetPath);
+                var targetFolder = folder.Key?.Replace(sourcePath, targetPath);
+                if (targetFolder == null) continue;
                 Directory.CreateDirectory(targetFolder);
                 foreach (var file in folder)
                 {
@@ -298,10 +302,12 @@ namespace NexNux.ViewModels
         {
             try
             {
+                IsDeploying = true;
                 DeploymentTotal = GetFileAmount(CurrentModList.GetActiveMods());
                 IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
                 modDeployer.FileDeployed += ModDeployer_FileDeployed;
                 await Task.Run(() => modDeployer.Deploy(CurrentModList.GetActiveMods()));
+                IsDeploying = false;
                 IsDeployed = true;
                 DeploymentProgress = 0;
             }
@@ -335,7 +341,11 @@ namespace NexNux.ViewModels
 
         private void UpdateDeploymentStatus()
         {
-            if (IsDeployed)
+            if (IsDeploying)
+            {
+                DeploymentStatus = "Deploying...";
+            }
+            else if (IsDeployed)
             {
                 DeploymentStatus = "✅ Mods deployed ✅";
             }
@@ -344,11 +354,12 @@ namespace NexNux.ViewModels
                 DeploymentStatus = "❌ Deployment needed ❌";
             }
         }
-        private double GetFileAmount(List<Mod> mods)
+        private double GetFileAmount(List<Mod?> mods)
         {
             int amount = 0;
-            foreach (Mod mod in mods)
+            foreach (Mod? mod in mods)
             {
+                if (mod == null) continue;
                 DirectoryInfo dir = new DirectoryInfo(mod.ModPath);
                 foreach (FileInfo file in dir.GetFiles("*", SearchOption.AllDirectories))
                 {

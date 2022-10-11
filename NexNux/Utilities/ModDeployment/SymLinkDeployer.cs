@@ -36,7 +36,7 @@ public class SymLinkDeployer : IModDeployer
     /// Deploys given list of files to the deployer's game's 'deploy' folder
     /// </summary>
     /// <param name="mods"></param>
-    public Task Deploy(List<Mod> mods)
+    public Task Deploy(List<Mod?> mods)
     {
         CheckAppPrivilege();
         LoadLinkedMods();
@@ -76,10 +76,10 @@ public class SymLinkDeployer : IModDeployer
         _deployedFiles = new List<string>();
     }
 
-    private void LinkMods(List<Mod> mods)
+    private void LinkMods(List<Mod?> mods)
     {
         double fileNumber = 0;
-        foreach (Mod mod in mods)
+        foreach (Mod? mod in mods)
         {
             DirectoryInfo modDir = new DirectoryInfo(mod.ModPath);
             foreach (FileInfo file in modDir.GetFiles("*", SearchOption.AllDirectories))
