@@ -17,6 +17,6 @@ public class ModFolderItem : IModItem
 
     public override string ToString()
     {
-        return "🗀 " + ItemName;
+        return "📁 " + ItemName;
     }
 }

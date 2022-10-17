@@ -17,6 +17,6 @@ public class ModFileItem : IModItem
 
     public override string ToString()
     {
-        return "🗋 " + ItemName;
+        return "📄 " + ItemName;
     }
 }

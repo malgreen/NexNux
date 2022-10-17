@@ -81,6 +81,7 @@ public class SymLinkDeployer : IModDeployer
         double fileNumber = 0;
         foreach (Mod? mod in mods)
         {
+            if (mod == null) continue;
             DirectoryInfo modDir = new DirectoryInfo(mod.ModPath);
             foreach (FileInfo file in modDir.GetFiles("*", SearchOption.AllDirectories))
             {

@@ -347,7 +347,7 @@ namespace NexNux.ViewModels
             }
             else if (IsDeployed)
             {
-                DeploymentStatus = "✅ Mods deployed ✅";
+                DeploymentStatus = "✔️ Mods deployed ✔️";
             }
             else
             {

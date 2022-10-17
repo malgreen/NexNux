@@ -179,13 +179,15 @@ public class ModConfigViewModel : ViewModelBase
     {
         try
         {
-            ExtractedFiles = new ObservableCollection<IModItem>();
-            ModFolderItem rootItem = new ModFolderItem(rootPath);
-            CurrentRoot = rootItem;
-            rootItem.ItemName = "root";
-            rootItem.SubItems = GetSubItems(rootPath);
-            //ExtractedFiles.Add(rootItem);
-            ExtractedFiles = rootItem.SubItems; //TBD - should it also show the root folder, or just files within it?
+            await Task.Run(() => {
+                ExtractedFiles = new ObservableCollection<IModItem>();
+                ModFolderItem rootItem = new ModFolderItem(rootPath);
+                CurrentRoot = rootItem;
+                rootItem.ItemName = "root";
+                rootItem.SubItems = GetSubItems(rootPath);
+                //ExtractedFiles.Add(rootItem);
+                ExtractedFiles = rootItem.SubItems; //TBD - should it also show the root folder, or just files within it?
+            });
         }
         catch (Exception e)
         {
@@ -240,8 +242,11 @@ public class ModConfigViewModel : ViewModelBase
     {
         try
         {
-            string installedModPath = Path.Combine(CurrentGame.ModDirectory, ModName);
-            Mod mod = new Mod(ModName, installedModPath, 0, CurrentGame.GetAllMods().Count, false); //FileSize is updated in the ModListVM
+            Mod mod = null!;
+            await Task.Run(() => {
+                string installedModPath = Path.Combine(CurrentGame.ModDirectory, ModName);
+                mod = new Mod(ModName, installedModPath, 0, CurrentGame.GetAllMods().Count, false); //FileSize is updated in the ModListVM
+            });
             return mod;
         }
         catch (Exception ex)
@@ -270,7 +275,7 @@ public class ModConfigViewModel : ViewModelBase
             StatusMessage = "❌ Mod name is too long";
         else
         {
-            StatusMessage = "✅ Looks good";
+            StatusMessage = "✔️ Looks good";
             CanInstall = true;
         }
     }
