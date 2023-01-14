@@ -1,121 +1,122 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:NexNux.ViewModels;assembly=NexNux"
+				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				xmlns:vm="clr-namespace:NexNux.ViewModels;assembly=NexNux"
 		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="670"
-        x:Class="NexNux.Views.ModListView"
-        Title="ModListView"
-		    ExtendClientAreaToDecorationsHint="True">
-	
-	
-	<Design.DataContext>
-		<vm:ModListViewModel/>
-	</Design.DataContext>
-	
-	<DockPanel>
-		<Grid>
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="3*"/>
-				<ColumnDefinition Width="1*" />
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition Height="33" />
-				<RowDefinition Height="1*" />
-				<RowDefinition Height="75" />
-			</Grid.RowDefinitions>
+				x:Class="NexNux.Views.ModListView"
+				Title="ModListView"
+				ExtendClientAreaToDecorationsHint="True">
 
-			<Menu DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Center">
+
+  <Design.DataContext>
+    <vm:ModListViewModel/>
+  </Design.DataContext>
+
+  <DockPanel>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="3*"/>
+        <ColumnDefinition Width="1*" />
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="33" />
+        <RowDefinition Height="1*" />
+        <RowDefinition Height="75" />
+      </Grid.RowDefinitions>
+
+
+      <Menu DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Center">
         <MenuItem IsHitTestVisible="False">
           <MenuItem.Header>
             <Image Source="avares://NexNux/Assets/avalonia-logo.ico"/>
           </MenuItem.Header>
         </MenuItem>
-				<MenuItem Header="_File">
-					<MenuItem Header="_Install mod from archive" Command="{Binding InstallModCommand}"/>
+        <MenuItem Header="_File">
+          <MenuItem Header="_Install mod from archive" Command="{Binding InstallModCommand}"/>
           <Separator/>
-					<MenuItem Header="_Deploy mods" Command="{Binding DeployModsCommand}" />
-					<MenuItem Header="_Clear deployment" Command="{Binding ClearModsCommand}">
+          <MenuItem Header="_Deploy mods" Command="{Binding DeployModsCommand}" />
+          <MenuItem Header="_Clear deployment" Command="{Binding ClearModsCommand}">
             <ToolTip.Tip>Clear the deploy folder</ToolTip.Tip>
           </MenuItem>
           <Separator/>
-					<MenuItem Header="_Change game" Command="{Binding ChangeGameCommand}"/>
-				</MenuItem>
-				<MenuItem Header="_Options">
-					<MenuItem Header="_Theme" IsEnabled="False"/>
+          <MenuItem Header="_Change game" Command="{Binding ChangeGameCommand}"/>
         </MenuItem>
-				<MenuItem Header="{Binding CurrentGame}" Foreground="{DynamicResource AccentButtonForeground}" Background="{DynamicResource AccentButtonBackgroundPressed}" IsHitTestVisible="False" Margin="40, 0, 0, 0" />
+        <MenuItem Header="_Options">
+          <MenuItem Header="_Theme" IsEnabled="False"/>
+        </MenuItem>
+        <MenuItem Header="{Binding CurrentGame}" Foreground="{DynamicResource AccentButtonForeground}" Background="{DynamicResource AccentButtonBackgroundPressed}" IsHitTestVisible="False" Margin="40, 0, 0, 0" />
       </Menu>
-			
-			<Border Grid.Column="0" Grid.Row="1" Margin="20, 10, 10, 10" CornerRadius="3" BorderBrush="Gray" BorderThickness="1">
-				<Canvas Name="GridModsCanvas" Width="{Binding $parent[Border].Bounds.Width}" Height="{Binding $parent[Border].Bounds.Height}">
-					<DataGrid   Name="GridMods"
+
+      <Border Grid.Column="0" Grid.Row="1" Margin="20, 10, 10, 10" CornerRadius="3" BorderBrush="Gray" BorderThickness="1">
+        <Canvas Name="GridModsCanvas" Width="{Binding $parent[Border].Bounds.Width}" Height="{Binding $parent[Border].Bounds.Height}">
+          <DataGrid   Name="GridMods"
 								Background="Transparent"
-								Items="{Binding VisibleMods}"  
+								Items="{Binding VisibleMods}"
 								AutoGenerateColumns="False"
 								DragDrop.AllowDrop="True"
 								CanUserSortColumns="False"
 								CanUserReorderColumns="False"
-                SelectedItem="{Binding SelectedMod, Mode=TwoWay}"
+								SelectedItem="{Binding SelectedMod, Mode=TwoWay}"
 								SelectionMode="Single"
 								AlternatingRowBackground="{DynamicResource SystemRevealListLowColor}"
 								Width="{Binding $parent[Border].Bounds.Width}"
 								Height="{Binding $parent[Border].Bounds.Height}"
-                >
-						<DataGrid.Styles>
+								>
+            <DataGrid.Styles>
               <Style Selector="DataGridColumnHeader">
-                  <Setter Property="IsHitTestVisible" Value="False" />
-									<Setter Property="Background" Value="Transparent" />
-									<Setter Property="DragDrop.AllowDrop" Value="False" />
+                <Setter Property="IsHitTestVisible" Value="False" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="DragDrop.AllowDrop" Value="False" />
               </Style>
               <Style Selector="DataGridCell:current /template/ Grid#FocusVisual">
-								<Setter Property="IsVisible" Value="False"/>
-							</Style>
-						</DataGrid.Styles>
-						<DataGrid.Columns>
-							<DataGridTextColumn Header="Order" Binding="{Binding Index}" Width="1*" CanUserResize="False" IsReadOnly="True" />
-							<DataGridTextColumn Header="Name" Binding="{Binding ModName}" Width="3*" CanUserResize="True" IsReadOnly="True"/>
-							<DataGridTextColumn Header="Size (mb)" Binding="{Binding FileSize}" Width="2*" CanUserResize="True" IsReadOnly="True" />
-							<!-- The next column is much the same as a CheckBoxColumn, but it doesn't need to be double clicked to be changed -->
-							<DataGridTemplateColumn Header="Enabled" Width="1*" CanUserResize="False">
-								<DataTemplate>
-									<CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center" />
-								</DataTemplate>
-							</DataGridTemplateColumn>
-						</DataGrid.Columns>
-					</DataGrid>
-				</Canvas>
-			</Border>
-			
-			<Border Grid.Column="0" Grid.Row="2" Margin="20, 10, 10, 10">
+                <Setter Property="IsVisible" Value="False"/>
+              </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Order" Binding="{Binding Index}" Width="1*" CanUserResize="False" IsReadOnly="True" />
+              <DataGridTextColumn Header="Name" Binding="{Binding ModName}" Width="3*" CanUserResize="True" IsReadOnly="True"/>
+              <DataGridTextColumn Header="Size (mb)" Binding="{Binding FileSize}" Width="2*" CanUserResize="True" IsReadOnly="True" />
+              <!-- The next column is much the same as a CheckBoxColumn, but it doesn't need to be double clicked to be changed -->
+              <DataGridTemplateColumn Header="Enabled" Width="1*" CanUserResize="False">
+                <DataTemplate>
+                  <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center" />
+                </DataTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </Canvas>
+      </Border>
+
+      <Border Grid.Column="0" Grid.Row="2" Margin="20, 10, 10, 10">
         <Grid>
-					<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="1*"/>
-								<ColumnDefinition Width="1*"/>
-								<ColumnDefinition Width="1*"/>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
           </Grid.ColumnDefinitions>
 
           <Button Grid.Column="0" Command="{Binding InstallModCommand}" HorizontalAlignment="Left">Install new mod</Button>
           <DockPanel Grid.Column="1">
-              <ProgressBar Name="DeployBar" HorizontalAlignment="Center" DockPanel.Dock="Top" Value="{Binding DeploymentProgress}" Maximum="{Binding DeploymentTotal}"></ProgressBar>
-              <Label Content="{Binding DeploymentStatus}" DockPanel.Dock="Bottom" VerticalAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Center"/> 
+            <ProgressBar Name="DeployBar" HorizontalAlignment="Center" DockPanel.Dock="Top" Value="{Binding DeploymentProgress}" Maximum="{Binding DeploymentTotal}"></ProgressBar>
+            <Label Content="{Binding DeploymentStatus}" DockPanel.Dock="Bottom" VerticalAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Center"/>
           </DockPanel>
           <Button Grid.Column="2" Command="{Binding UninstallModCommand}" IsEnabled="{Binding SelectedMod, Converter={x:Static ObjectConverters.IsNotNull}}" HorizontalAlignment="Right">Uninstall mod</Button>
         </Grid>
-			</Border>
-		
+      </Border>
 
-			<Border Grid.Column="1" Grid.Row="1" Margin="10">
-				<DockPanel>
-					<TextBox DockPanel.Dock="Top" VerticalAlignment="Stretch" Text="{Binding ModInfo}" IsReadOnly="True" Watermark="No mod selected" Background="Transparent" HorizontalContentAlignment="Center" BorderBrush="Gray"></TextBox>
-					<Button DockPanel.Dock="Bottom" HorizontalAlignment="Center" VerticalAlignment="Top" IsEnabled="False">Configure mod</Button>
-				</DockPanel>
+
+      <Border Grid.Column="1" Grid.Row="1" Margin="10">
+        <DockPanel>
+          <TextBox DockPanel.Dock="Top" VerticalAlignment="Stretch" Text="{Binding ModInfo}" IsReadOnly="True" Watermark="No mod selected" Background="Transparent" HorizontalContentAlignment="Center" BorderBrush="Gray"></TextBox>
+          <Button DockPanel.Dock="Bottom" HorizontalAlignment="Center" VerticalAlignment="Top" IsEnabled="False">Configure mod</Button>
+        </DockPanel>
       </Border>
-			
-			<Border Grid.Column="1" Grid.Row="2" Margin="10" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Button Command="{Binding DeployModsCommand}" IsEnabled="{Binding !IsDeploying}" HorizontalAlignment="Center">Deploy mods</Button>
+
+      <Border Grid.Column="1" Grid.Row="2" Margin="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Button Command="{Binding DeployModsCommand}" IsEnabled="{Binding !IsDeploying}" HorizontalAlignment="Center">Deploy mods</Button>
       </Border>
-			
-		</Grid>
-	</DockPanel>
+
+    </Grid>
+  </DockPanel>
 </Window>
