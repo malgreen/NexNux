@@ -97,6 +97,6 @@ public class GameList
     public bool DirsInUse(string deployDir, string modDir)
     {
         return Games.Find(item => item.DeployDirectory == deployDir) != null ||
-               Games.Find(item => item.ModDirectory == modDir) != null;
+               Games.Find(item => item.ModsDirectory == modDir) != null;
     }
 }

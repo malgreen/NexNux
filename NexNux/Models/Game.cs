@@ -3,26 +3,31 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace NexNux.Models;
 
 public class Game
 {
-    public Game(string gameName, string deployDirectory, string modDirectory)
+    public Game(string gameName, string deployDirectory, string modsDirectory)
     {
         GameName = gameName;
         DeployDirectory = deployDirectory;
-        ModDirectory = modDirectory;
-        ModSettingsDirectory = Path.Combine(ModDirectory, ".NexNux");
+        ModsDirectory = modsDirectory;
+        SettingsDirectory = Path.Combine(ModsDirectory, ".NexNux");
         ValidateInfo();
-        _modList = new ModList(ModListFile ?? throw new InvalidOperationException());
+
+        Settings = new GameSettings(SettingsDirectory ?? throw new InvalidOperationException());
+        _modList = new ModList(SettingsDirectory ?? throw new InvalidOperationException());
     }
 
     public string GameName { get; set; }
     public string DeployDirectory { get; set; }
-    public string ModDirectory { get; set; }
-    public string ModSettingsDirectory { get; set; }
-    public string ModListFile { get; set; }
+    public string ModsDirectory { get; set; }
+    public string SettingsDirectory { get; set; }
+
+    [JsonIgnore]
+    public GameSettings Settings { get; private set; }
     private ModList _modList;
 
     void ValidateInfo()
@@ -31,14 +36,13 @@ public class Game
             throw new Exception("Game must have a name");
 
         FileInfo deployInfo = new FileInfo(DeployDirectory);
-        FileInfo modsInfo = new FileInfo(ModDirectory);
+        FileInfo modsInfo = new FileInfo(ModsDirectory);
         if (!Equals(Path.GetPathRoot(deployInfo.FullName), Path.GetPathRoot(modsInfo.FullName)))
             throw new Exception("Directories must reside on the same drive"); // Hardlink deployment cannot be done if different drives
 
         Directory.CreateDirectory(DeployDirectory);
-        Directory.CreateDirectory(ModDirectory);
-        Directory.CreateDirectory(ModSettingsDirectory);
-        ModListFile = Path.Combine(ModSettingsDirectory, "ModList.json");
+        Directory.CreateDirectory(ModsDirectory);
+        Directory.CreateDirectory(SettingsDirectory);
     }
 
     public List<Mod?> GetAllMods()
@@ -57,7 +61,7 @@ public class Game
     /// TODO: When mod deployment is implemented, should also restore all original files first
     public void DeleteMods()
     {
-        DirectoryInfo dirInfo = new DirectoryInfo(ModDirectory);
+        DirectoryInfo dirInfo = new DirectoryInfo(ModsDirectory);
 
         foreach (FileInfo file in dirInfo.GetFiles())
         {

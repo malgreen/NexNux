@@ -9,9 +9,9 @@ namespace NexNux.Models;
 
 public class ModList
 {
-    public ModList(string modListFileName)
+    public ModList(string settingsDir)
     {
-        _modListFileName = modListFileName;
+        _modListFileName = Path.Combine(settingsDir, "ModList.json");
         Mods = LoadList();
     }
 
@@ -36,22 +36,16 @@ public class ModList
     public List<Mod?> LoadList()
     {
         List<Mod?> loadedMods = new List<Mod?>();
-        try
+
+        if (!File.Exists(_modListFileName))
         {
-            string jsonString = File.ReadAllText(_modListFileName);
-            loadedMods = JsonSerializer.Deserialize<List<Mod>>(jsonString) ??
-                         throw new InvalidOperationException();
-        }
-        catch (FileNotFoundException ex)
-        {
-            Debug.WriteLine(ex);
             Mods = new List<Mod?>();
             SaveList();
-            LoadList();
         }
-        catch (Exception ex)
+        else
         {
-            Debug.WriteLine(ex);
+            string jsonString = File.ReadAllText(_modListFileName);
+            loadedMods = JsonSerializer.Deserialize<List<Mod?>>(jsonString) ?? throw new InvalidOperationException();
         }
 
         return loadedMods;

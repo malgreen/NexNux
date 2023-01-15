@@ -118,7 +118,7 @@ public class ModConfigViewModel : ViewModelBase
         if (CurrentGame == null) return;
         ModArchivePath = archivePath;
         ModName = Path.GetFileNameWithoutExtension(archivePath);
-        string extractionPath = Path.Combine(CurrentGame.ModSettingsDirectory, "__installcache");
+        string extractionPath = Path.Combine(CurrentGame.SettingsDirectory, "__installcache");
         await ExtractArchiveAsync(ModArchivePath, extractionPath);
         await UpdateExtractedFiles(extractionPath);
         ValidateModInput();
@@ -244,7 +244,7 @@ public class ModConfigViewModel : ViewModelBase
         {
             Mod mod = null!;
             await Task.Run(() => {
-                string installedModPath = Path.Combine(CurrentGame.ModDirectory, ModName);
+                string installedModPath = Path.Combine(CurrentGame.ModsDirectory, ModName);
                 mod = new Mod(ModName, installedModPath, 0, CurrentGame.GetAllMods().Count, false); //FileSize is updated in the ModListVM
             });
             return mod;

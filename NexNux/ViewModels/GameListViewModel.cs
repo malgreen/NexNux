@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -61,12 +62,18 @@ public class GameListViewModel : ViewModelBase
 
     private async Task AddGame()
     {
-        GameConfigViewModel config = new GameConfigViewModel();
-        Game? result = await ShowConfigDialog.Handle(config);
-        if (result != null)
+        try
         {
-            MainGameList.ModifyGame(result.GameName, result.DeployDirectory, result.ModDirectory);
+            GameConfigViewModel config = new GameConfigViewModel();
+            Game? result = await ShowConfigDialog.Handle(config);
+            if (result == null) return;
+
+            MainGameList.ModifyGame(result.GameName, result.DeployDirectory, result.ModsDirectory);
             Games = new ObservableCollection<Game>(MainGameList.Games); // There might very well be a better way to do this
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
         }
     }
 
@@ -87,7 +94,7 @@ public class GameListViewModel : ViewModelBase
         GameConfigViewModel config = new GameConfigViewModel();
         config.GameName = SelectedGame.GameName;
         config.DeployPath = SelectedGame.DeployDirectory;
-        config.ModsPath = SelectedGame.ModDirectory;
+        config.ModsPath = SelectedGame.ModsDirectory;
         Game? result = await ShowConfigDialog.Handle(config);
         if (result != null)
         {

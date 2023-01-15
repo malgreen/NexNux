@@ -24,9 +24,8 @@ namespace NexNux.ViewModels
             ShowErrorDialog = new Interaction<string, bool>();
             ShowModExistsDialog = new Interaction<Mod?, bool>();
             ShowGameList = new Interaction<Unit, Unit>();
-            IsDeployed = true; // This could also be false to start off with
+            IsDeployed = false; // Updated when changing game
             DeploymentTotal = 1;
-            UpdateDeploymentStatus();
 
             VisibleMods = new ObservableCollection<Mod?>();
             VisibleMods.CollectionChanged += UpdateModList;
@@ -128,11 +127,11 @@ namespace NexNux.ViewModels
         {
             VisibleMods.CollectionChanged -= UpdateModList; //Not doing this might lead to memory leak
             CurrentGame = game;
-            string modListFile = CurrentGame.ModListFile;
-            CurrentModList = new ModList(modListFile);
+            CurrentModList = new ModList(CurrentGame.SettingsDirectory);
 
             VisibleMods = new ObservableCollection<Mod?>(CurrentModList.LoadList());
             SetModListeners(VisibleMods, null!);
+            IsDeployed = CurrentGame.Settings.RecentlyDeployed;
 
             VisibleMods.CollectionChanged += UpdateModList;
         }
@@ -141,7 +140,7 @@ namespace NexNux.ViewModels
         {
             try
             {
-                string installCacheDir = Path.Combine(CurrentGame.ModSettingsDirectory, "__installcache");
+                string installCacheDir = Path.Combine(CurrentGame.SettingsDirectory, "__installcache");
                 ModConfigViewModel modConfigViewModel = new ModConfigViewModel
                 {
                     CurrentGame = CurrentGame
@@ -154,7 +153,7 @@ namespace NexNux.ViewModels
                 }
 
                 Mod? existingMod = VisibleMods.FirstOrDefault(item => item?.ModName == mod.ModName);
-                string installedModPath = Path.Combine(CurrentGame.ModDirectory, mod.ModName);
+                string installedModPath = Path.Combine(CurrentGame.ModsDirectory, mod.ModName);
 
                 if (existingMod != null)
                 {
@@ -352,6 +351,11 @@ namespace NexNux.ViewModels
             else
             {
                 DeploymentStatus = "❌ Deployment needed ❌";
+            }
+            if (CurrentGame != null)
+            {
+                CurrentGame.Settings.RecentlyDeployed = IsDeployed;
+                CurrentGame.Settings.Save();
             }
         }
         private double GetFileAmount(List<Mod?> mods)

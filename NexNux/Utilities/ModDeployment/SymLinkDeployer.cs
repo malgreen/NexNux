@@ -16,8 +16,8 @@ public class SymLinkDeployer : IModDeployer
     {
         CurrentGame = game;
         _deployPath = CurrentGame.DeployDirectory;
-        _cachePath = Path.Combine(CurrentGame.ModSettingsDirectory, "__deploycache");
-        _jsonPath = Path.Combine(CurrentGame.ModSettingsDirectory, "DeployedFiles.json");
+        _cachePath = Path.Combine(CurrentGame.SettingsDirectory, "__deploycache");
+        _jsonPath = Path.Combine(CurrentGame.SettingsDirectory, "DeployedFiles.json");
         _deployedFiles = new List<string>();
         _cachedFiles = new List<string>();
 
