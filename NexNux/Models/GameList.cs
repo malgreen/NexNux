@@ -20,7 +20,7 @@ public class GameList
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(GameListFile));
+            Directory.CreateDirectory(Path.GetDirectoryName(GameListFile) ?? throw new InvalidOperationException());
             using FileStream createStream = File.Create(GameListFile);
             JsonSerializer.Serialize(createStream, Games, new JsonSerializerOptions() { WriteIndented = true });
             createStream.Dispose();

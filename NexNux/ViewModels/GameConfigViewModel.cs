@@ -2,18 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Media;
 using ReactiveUI;
-using MessageBox.Avalonia;
 using NexNux.Models;
-using NexNux.Views;
 
 namespace NexNux.ViewModels;
 
@@ -34,9 +27,9 @@ public class GameConfigViewModel : ViewModelBase
         ModsPath = string.Empty;
         DeployPath = string.Empty;
 
-        this.WhenAnyValue(x => x.GameName).Subscribe(x => ValidateGameInput());
-        this.WhenAnyValue(x => x.DeployPath).Subscribe(x => ValidateGameInput());
-        this.WhenAnyValue(x => x.ModsPath).Subscribe(x => ValidateGameInput());
+        this.WhenAnyValue(x => x.GameName).Subscribe(_ => ValidateGameInput());
+        this.WhenAnyValue(x => x.DeployPath).Subscribe(_ => ValidateGameInput());
+        this.WhenAnyValue(x => x.ModsPath).Subscribe(_ => ValidateGameInput());
 
 
     }
@@ -86,7 +79,7 @@ public class GameConfigViewModel : ViewModelBase
     {
         try
         {
-            Game? game = new Game(GameName, DeployPath, ModsPath);
+            Game game = new Game(GameName, DeployPath, ModsPath);
             return game;
         }
         catch (Exception e)

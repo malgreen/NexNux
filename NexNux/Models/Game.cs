@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -52,7 +51,7 @@ public class Game
 
     public List<Mod?> GetActiveMods()
     {
-        return new List<Mod?>(_modList.Mods.Where(d => d.Enabled));
+        return new List<Mod?>(_modList.Mods.Where(d => d != null && d.Enabled == true));
     }
 
     /// <summary>

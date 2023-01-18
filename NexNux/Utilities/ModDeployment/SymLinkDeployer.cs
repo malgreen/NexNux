@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -10,7 +9,7 @@ using NexNux.Models;
 
 namespace NexNux.Utilities.ModDeployment;
 
-public class SymLinkDeployer : IModDeployer
+public sealed class SymLinkDeployer : IModDeployer
 {
     public SymLinkDeployer(Game game)
     {
@@ -65,7 +64,7 @@ public class SymLinkDeployer : IModDeployer
             File.Delete(filePath);
         }
         // Moves all files in cache to deploy dir
-        DirectoryInfo cacheDir = new DirectoryInfo(_cachePath);
+        //DirectoryInfo cacheDir = new DirectoryInfo(_cachePath);
         foreach (string filePath in _cachedFiles)
         {
             string subPath = Path.GetRelativePath(_cachePath, filePath);
@@ -103,7 +102,7 @@ public class SymLinkDeployer : IModDeployer
         if (File.Exists(finalPath) && !_deployedFiles.Exists(p => p == finalPath))
         {
             string cacheFile = Path.Combine(_cachePath, Path.GetFileName(finalPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile) ?? throw new InvalidOperationException());
             File.Move(finalPath, cacheFile);
             _cachedFiles.Add(cacheFile);
         }
@@ -114,14 +113,14 @@ public class SymLinkDeployer : IModDeployer
             File.Delete(finalPath);
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(finalPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(finalPath) ?? throw new InvalidOperationException());
         File.CreateSymbolicLink(finalPath, file.FullName);
         _deployedFiles.Add(finalPath);
     }
 
     private void SaveLinkedMods()
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(_jsonPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(_jsonPath) ?? throw new InvalidOperationException());
         using FileStream createStream = File.Create(_jsonPath);
         JsonSerializer.Serialize(createStream, _deployedFiles, new JsonSerializerOptions() { WriteIndented = true });
         createStream.Dispose();
@@ -131,14 +130,14 @@ public class SymLinkDeployer : IModDeployer
         if (!File.Exists(_jsonPath))
             SaveLinkedMods();
         string fileContent = File.ReadAllText(_jsonPath);
-        _deployedFiles = JsonSerializer.Deserialize<List<string>>(fileContent);
+        _deployedFiles = JsonSerializer.Deserialize<List<string>>(fileContent) ?? throw new InvalidOperationException();
     }
 
     private void CheckAppPrivilege()
     {
         // Creating symbolic links in Windows requires admin rights
         // Taken from https://stackoverflow.com/a/52745016
-        string name = System.AppDomain.CurrentDomain.FriendlyName;
+        string name = AppDomain.CurrentDomain.FriendlyName;
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -158,8 +157,9 @@ public class SymLinkDeployer : IModDeployer
         //}
     }
 
-    protected virtual void OnFileLinked(FileDeployedArgs e)
+    private void OnFileLinked(FileDeployedArgs e)
     {
+        if (FileDeployed == null) return;
         EventHandler<FileDeployedArgs> handler = FileDeployed;
         if (handler == null) return;
         handler(this, e);

@@ -4,26 +4,25 @@ using Avalonia.Markup.Xaml;
 using NexNux.ViewModels;
 using NexNux.Views;
 
-namespace NexNux
+namespace NexNux;
+
+public class App : Application
 {
-    public partial class App : Application
+    public override void Initialize()
     {
-        public override void Initialize()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+        AvaloniaXamlLoader.Load(this);
+    }
 
-        public override void OnFrameworkInitializationCompleted()
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.MainWindow = new GameListView
             {
-                desktop.MainWindow = new GameListView
-                {
-                    DataContext = new GameListViewModel()
-                };
-            }
-
-            base.OnFrameworkInitializationCompleted();
+                DataContext = new GameListViewModel()
+            };
         }
+
+        base.OnFrameworkInitializationCompleted();
     }
 }

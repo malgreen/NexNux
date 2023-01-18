@@ -51,22 +51,9 @@ public class ModList
         return loadedMods;
     }
 
-    void SetupFile()
-    {
-        try
-        {
-            using FileStream createStream = File.Create(_modListFileName);
-            createStream.Dispose();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.StackTrace);
-        }
-    }
-
     public List<Mod?> GetActiveMods()
     {
-        return new List<Mod?>(Mods.Where(d => d.Enabled));
+        return new List<Mod?>(Mods.Where(d => d != null && d.Enabled));
     }
 
     public void InstallMod(Mod mod, string rootPath)

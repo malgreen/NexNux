@@ -1,13 +1,11 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.Interactivity;
 using Avalonia.Input;
 using System.Collections.Generic;
 using NexNux.Models;
 using ReactiveUI;
 using System;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Avalonia.ReactiveUI;
 using MessageBox.Avalonia;
@@ -15,11 +13,8 @@ using MessageBox.Avalonia.Enums;
 using NexNux.ViewModels;
 using Avalonia.VisualTree;
 using System.Linq;
-using Avalonia.LogicalTree;
-using Avalonia.Controls.Generators;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
-using System.Diagnostics;
 using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
 
@@ -69,7 +64,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
     private void DataGrid_DragOver(object? sender, DragEventArgs e)
     {
         ClearDropPoint();
-        DataGridRow? targetRow = ((IControl)e.Source).GetSelfAndVisualAncestors()
+        DataGridRow? targetRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
                                                         .OfType<DataGridRow>()
                                                         .FirstOrDefault();
         ShowDropPoint(e.Data.Get("DragSource") as DataGridRow, targetRow);
@@ -91,7 +86,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
     {
         if (_dragStartPoint == null) return; // Basically '!IsDragging', it's modified in the PointerPressed and PointerReleased
 
-        if (sender is DataGrid dataGrid)
+        if (sender is DataGrid)
         {
             Point mousePosition = e.GetPosition(null);
             Vector positionDiff = _dragStartPoint.Value - mousePosition;
@@ -102,7 +97,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             if (draggedEnoughX || draggedEnoughY)
             {
                 // Get the dragged row
-                DataGridRow? sourceRow = ((IControl)e.Source).GetSelfAndVisualAncestors()
+                DataGridRow? sourceRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
                                                             .OfType<DataGridRow>()
                                                             .FirstOrDefault();
                 if (sourceRow == null) return;
@@ -124,7 +119,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
 
     private void DataGrid_Drop(object? sender, DragEventArgs e)
     {
-        if(sender is DataGrid dataGrid && DataContext is ModListViewModel mlvm)
+        if(sender is DataGrid && DataContext is ModListViewModel mlvm)
         {
             _dragStartPoint = null;
 
@@ -133,11 +128,11 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             if (draggedMod == null) return;
 
             // Get targetRow by the drop position
-            DataGridRow? targetRow = ((IControl)e.Source).GetSelfAndVisualAncestors()
+            DataGridRow? targetRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
                                                             .OfType<DataGridRow>()
                                                             .FirstOrDefault();
 
-            int sourceIndex = (int)e.Data.Get("SourceIndex");
+            int sourceIndex = (int)(e.Data.Get("SourceIndex") ?? throw new InvalidOperationException());
             int targetIndex = mlvm.VisibleMods.Count - 1; // If dragged to the empty part of the DataGrid, it should just add it underneath
 
             // The actual drop/movement operation - this should be converted to command/interaction for MVVM
@@ -216,7 +211,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
-    private async Task DoShowModExistsDialogAsync(InteractionContext<Mod, bool> interactionContext)
+    private async Task DoShowModExistsDialogAsync(InteractionContext<Mod?, bool> interactionContext)
     {
         var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
             "Mod already exists",
@@ -228,7 +223,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
-    private void ShowDropPoint(DataGridRow sourceRow, DataGridRow targetRow)
+    private void ShowDropPoint(DataGridRow? sourceRow, DataGridRow? targetRow)
     {
         if (sourceRow == null || targetRow == null) return;
 
@@ -270,23 +265,22 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
     {
         if (this.GetControl<Canvas>("GridModsCanvas").Children.Count <= 1) return;
 
-        Line existingLine = this.GetControl<Canvas>("GridModsCanvas").Children.OfType<Line>().First();
-        if (existingLine != null)
-        {
-            this.GetControl<Canvas>("GridModsCanvas").Children.Remove(existingLine);
-        }
+        Line? existingLine = this.GetControl<Canvas>("GridModsCanvas").Children.OfType<Line>().FirstOrDefault();
+        if (existingLine == null) return;
+        this.GetControl<Canvas>("GridModsCanvas").Children.Remove(existingLine);
     }
 
-    private async Task DoShowGameList(InteractionContext<Unit, Unit> interactionContext)
+    private Task DoShowGameList(InteractionContext<Unit, Unit> interactionContext)
     {
         GameListViewModel viewModel = new GameListViewModel();
         GameListView gameListView = new GameListView();
         gameListView.DataContext = viewModel;
         gameListView.Show();
-        if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
         {
             lifetime.MainWindow = gameListView;
         }
         this.Close();
+        return Task.CompletedTask;
     }
 }

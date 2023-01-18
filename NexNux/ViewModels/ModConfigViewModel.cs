@@ -25,24 +25,24 @@ public class ModConfigViewModel : ViewModelBase
         InstallModCommand = ReactiveCommand.CreateFromTask(InstallMod);
         CancelCommand = ReactiveCommand.CreateFromTask(Cancel);
 
-        this.WhenAnyValue(x => x.ModName).Subscribe(x => ValidateModInput());
+        this.WhenAnyValue(x => x.ModName).Subscribe(_ => ValidateModInput());
     }
 
-    private Game _currentGame;
+    private Game _currentGame = null!;
     public Game CurrentGame
     {
         get => _currentGame;
         set => this.RaiseAndSetIfChanged(ref _currentGame, value);
     }
 
-    private string _modName;
+    private string _modName = null!;
     public string ModName
     {
         get => _modName;
         set => this.RaiseAndSetIfChanged(ref _modName, value);
     }
 
-    private string _modArchivePath;
+    private string _modArchivePath = null!;
     public string ModArchivePath
     {
         get => _modArchivePath;
@@ -63,14 +63,14 @@ public class ModConfigViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isExtracting, value);
     }
 
-    private ObservableCollection<IModItem> _extractedFiles;
+    private ObservableCollection<IModItem> _extractedFiles = null!;
     public ObservableCollection<IModItem> ExtractedFiles
     {
         get => _extractedFiles;
         set => this.RaiseAndSetIfChanged(ref _extractedFiles, value);
     }
 
-    private IModItem _selectedItem;
+    private IModItem _selectedItem = null!;
     public IModItem SelectedItem
     {
         get => _selectedItem;
@@ -84,7 +84,7 @@ public class ModConfigViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _archiveSize, value);
     }
 
-    private ModFolderItem _currentRoot;
+    private ModFolderItem _currentRoot = null!;
     public ModFolderItem CurrentRoot
     {
         get => _currentRoot;
@@ -98,7 +98,7 @@ public class ModConfigViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _canInstall, value);
     }
 
-    private string _statusMessage;
+    private string _statusMessage = null!;
     public string StatusMessage
     {
         get => _statusMessage;
@@ -115,7 +115,7 @@ public class ModConfigViewModel : ViewModelBase
 
     public async void UpdateModArchive(string archivePath)
     {
-        if (CurrentGame == null) return;
+        // TODO: remove this: if (CurrentGame == null) return;
         ModArchivePath = archivePath;
         ModName = Path.GetFileNameWithoutExtension(archivePath);
         string extractionPath = Path.Combine(CurrentGame.SettingsDirectory, "__installcache");
@@ -149,7 +149,7 @@ public class ModConfigViewModel : ViewModelBase
                     if (!_archiveReader.Entry.IsDirectory)
                     {
                         ExtractionProgress++;
-                        StatusMessage = "Extracting " + _archiveReader.Entry.ToString();
+                        StatusMessage = "Extracting " + _archiveReader.Entry;
                         try
                         {
                             _archiveReader.WriteEntryToDirectory(outputPath, new ExtractionOptions()
@@ -229,8 +229,8 @@ public class ModConfigViewModel : ViewModelBase
     {
         try
         {
-            string selectedPath = Path.GetDirectoryName(SelectedItem.ItemPath);
-            await Application.Current.Clipboard.SetTextAsync(selectedPath);
+            string selectedPath = Path.GetDirectoryName(SelectedItem.ItemPath) ?? throw new InvalidOperationException();
+            await Application.Current!.Clipboard!.SetTextAsync(selectedPath);
         }
         catch (Exception ex)
         {
@@ -256,10 +256,10 @@ public class ModConfigViewModel : ViewModelBase
         }
     }
 
-    public async Task<Mod?> Cancel()
+    public Task<Mod?> Cancel()
     {
         _archiveReader?.Cancel();
-        return null; //There is null-checking in the modlistviewmodel
+        return Task.FromResult<Mod?>(null); //There is null-checking in the modlistviewmodel
     }
 
     private void ValidateModInput()
