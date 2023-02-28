@@ -45,9 +45,10 @@
         </DockPanel>
       </Border>
 
-      <Border Padding="5" DockPanel.Dock="Top" Grid.Column="1" Grid.Row="2">
+      <Border Padding="5" DockPanel.Dock="Top" Grid.Column="1" Grid.Row="2" CornerRadius="4">
         <ListBox Items="{Binding Games}"
                      SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
+                     CornerRadius="4"
 				       >
 
         </ListBox>

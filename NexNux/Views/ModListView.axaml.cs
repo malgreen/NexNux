@@ -15,27 +15,21 @@ using Avalonia.VisualTree;
 using System.Linq;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
-using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
 
 namespace NexNux.Views;
 
-public partial class ModListView : ReactiveWindow<ModListViewModel>
+public partial class ModListView : ReactiveUserControl<ModListViewModel>
 {
     Point? _dragStartPoint;
     public ModListView()
     {
         InitializeComponent();
-        this.DataContextChanged += ModListView_DataContextChanged;
         this.WhenActivated(d => d(ViewModel!.ShowModInstallDialog.RegisterHandler(DoShowModInstallDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowModUninstallDialog.RegisterHandler(DoShowModUninstallDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowErrorDialog.RegisterHandler(DoShowErrorDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowModExistsDialog.RegisterHandler(DoShowModExistsDialogAsync)));
-        this.WhenActivated(d => d(ViewModel!.ShowGameList.RegisterHandler(DoShowGameList)));
         SetupGridHandlers();
-#if DEBUG
-        this.AttachDevTools();
-#endif
     }
 
     private void InitializeComponent()
@@ -154,18 +148,10 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
         }
     }
 
-    private void ModListView_DataContextChanged(object? sender, EventArgs e)
-    {
-        if (DataContext is ModListViewModel modListViewModel)
-        {
-            Title = "NexNux - " + modListViewModel.CurrentGame;
-        }
-    }
-
     private async Task DoShowErrorDialogAsync(InteractionContext<string, bool> interactionContext)
     {
-        var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", interactionContext.Input, ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Warning);
-        await messageBox.ShowDialog(this);
+        var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", interactionContext.Input, ButtonEnum.Ok, Icon.Warning);
+        await messageBox.ShowDialog(GetMainWindow());
         interactionContext.SetOutput(true);
     }
 
@@ -184,7 +170,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             }
         };
 
-        string[]? result = await openFileDialog.ShowAsync(this);
+        string[]? result = await openFileDialog.ShowAsync(GetMainWindow() ?? throw new InvalidOperationException());
         if (result == null)
         {
             interactionContext.SetOutput(null);
@@ -195,7 +181,7 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
         interactionContext.Input.UpdateModArchive(string.Join("", result));
         dialog.DataContext = interactionContext.Input;
 
-        Mod? mod = await dialog.ShowDialog<Mod>(this);
+        Mod? mod = await dialog.ShowDialog<Mod>(GetMainWindow());
         interactionContext.SetOutput(mod);
     }
     
@@ -205,9 +191,9 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             $"Uninstalling {interactionContext.Input}, are you sure?",
             $"This will also delete the files for \"{interactionContext.Input}\" from your system.", // currently this is a lie
             ButtonEnum.OkCancel,
-            MessageBox.Avalonia.Enums.Icon.Warning
+            Icon.Warning
         );
-        var result = await messageBox.ShowDialog(this);
+        var result = await messageBox.ShowDialog(GetMainWindow());
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
@@ -217,9 +203,9 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
             "Mod already exists",
             $"Mod \"{interactionContext.Input}\" already exists, continuing will merge the two while overriding existing files.", // currently this is a lie
             ButtonEnum.OkCancel,
-            MessageBox.Avalonia.Enums.Icon.Info
+            Icon.Info
         );
-        var result = await messageBox.ShowDialog(this);
+        var result = await messageBox.ShowDialog(GetMainWindow());
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
@@ -269,18 +255,14 @@ public partial class ModListView : ReactiveWindow<ModListViewModel>
         if (existingLine == null) return;
         this.GetControl<Canvas>("GridModsCanvas").Children.Remove(existingLine);
     }
-
-    private Task DoShowGameList(InteractionContext<Unit, Unit> interactionContext)
+    
+    private Window? GetMainWindow()
     {
-        GameListViewModel viewModel = new GameListViewModel();
-        GameListView gameListView = new GameListView();
-        gameListView.DataContext = viewModel;
-        gameListView.Show();
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
         {
-            lifetime.MainWindow = gameListView;
+            return lifetime.MainWindow;
         }
-        this.Close();
-        return Task.CompletedTask;
+
+        return null;
     }
 }

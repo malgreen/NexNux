@@ -1,12 +1,11 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
 				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				xmlns:vm="clr-namespace:NexNux.ViewModels;assembly=NexNux"
 		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="670"
 				x:Class="NexNux.Views.ModListView"
-				Title="ModListView"
-				ExtendClientAreaToDecorationsHint="True">
+				>
 
 
   <Design.DataContext>
@@ -27,11 +26,6 @@
 
 
       <Menu DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Center">
-        <MenuItem IsHitTestVisible="False">
-          <MenuItem.Header>
-            <Image Source="avares://NexNux/Assets/avalonia-logo.ico"/>
-          </MenuItem.Header>
-        </MenuItem>
         <MenuItem Header="_File">
           <MenuItem Header="_Install mod from archive" Command="{Binding InstallModCommand}"/>
           <Separator/>
@@ -39,13 +33,7 @@
           <MenuItem Header="_Clear deployment" Command="{Binding ClearModsCommand}">
             <ToolTip.Tip>Clear the deploy folder</ToolTip.Tip>
           </MenuItem>
-          <Separator/>
-          <MenuItem Header="_Change game" Command="{Binding ChangeGameCommand}"/>
         </MenuItem>
-        <MenuItem Header="_Options">
-          <MenuItem Header="_Theme" IsEnabled="False"/>
-        </MenuItem>
-        <MenuItem Header="{Binding CurrentGame}" Foreground="{DynamicResource AccentButtonForeground}" Background="{DynamicResource AccentButtonBackgroundPressed}" IsHitTestVisible="False" Margin="40, 0, 0, 0" />
       </Menu>
 
       <Border Grid.Column="0" Grid.Row="1" Margin="20, 10, 10, 10" CornerRadius="3" BorderBrush="Gray" BorderThickness="1">
@@ -119,4 +107,4 @@
 
     </Grid>
   </DockPanel>
-</Window>
+</UserControl>
