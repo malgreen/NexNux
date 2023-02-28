@@ -12,7 +12,7 @@
         x:Class="NexNux.Views.ModConfigView"
         Title="ModConfigView">
   <Window.Resources>
-    <converters:IsModItemFolderConverter x:Key="isModItemFolderConverter"/>
+    <converters:IsModItemFolderConverter x:Key="IsModItemFolderConverter"/>
   </Window.Resources>
 
   <DockPanel>
@@ -44,7 +44,7 @@
                     <MenuFlyout>
                       <MenuItem Header="Make root"
                                 Command="{Binding $parent[TreeView].DataContext.SetSelectionToRootCommand}"
-                                IsEnabled="{Binding $parent[TreeView].SelectedItem, Converter={StaticResource isModItemFolderConverter}}"/>
+                                IsEnabled="{Binding $parent[TreeView].SelectedItem, Converter={StaticResource IsModItemFolderConverter}}"/>
                       <MenuItem Header="Copy path"
                                 Command="{Binding $parent[TreeView].DataContext.SetSelectionToClipboardCommand}"
                                                   />

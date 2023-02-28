@@ -18,7 +18,7 @@ public partial class GameListView : ReactiveWindow<GameListViewModel>
         InitializeComponent();
         this.WhenActivated(d => d(ViewModel!.ShowConfigDialog.RegisterHandler(DoShowGameConfigDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowRemoveDialog.RegisterHandler(DoShowGameRemoveDialogAsync)));
-        this.WhenActivated(d => d(ViewModel!.ShowModList.RegisterHandler(DoShowModListWindow)));
+        this.WhenActivated(d => d(ViewModel!.ShowHomeView.RegisterHandler(DoShowHomeView)));
 #if DEBUG
         this.AttachDevTools();
 #endif
@@ -50,15 +50,16 @@ public partial class GameListView : ReactiveWindow<GameListViewModel>
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
-    private Task DoShowModListWindow(InteractionContext<ModListViewModel, bool> interactionContext)
+    private Task DoShowHomeView(InteractionContext<HomeViewModel, bool> interactionContext)
     {
-        ModListView modListView = new ModListView();
-        modListView.DataContext = interactionContext.Input;
-        modListView.Show();
+        HomeView homeView = new HomeView();
+        homeView.DataContext = interactionContext.Input;
+        homeView.Show();
         if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
         {
-            desktopLifetime.MainWindow = modListView;
+            desktopLifetime.MainWindow = homeView;
         }
+
         interactionContext.SetOutput(true); // maybe this should not be an interaction
         Close();
         return Task.CompletedTask;

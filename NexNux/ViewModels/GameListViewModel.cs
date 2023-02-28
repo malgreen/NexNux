@@ -22,7 +22,7 @@ public class GameListViewModel : ViewModelBase
 
         ShowConfigDialog = new Interaction<GameConfigViewModel, Game?>();
         ShowRemoveDialog = new Interaction<Game, bool>();
-        ShowModList = new Interaction<ModListViewModel, bool>();
+        ShowHomeView = new Interaction<HomeViewModel, bool>();
         
         AddGameCommand = ReactiveCommand.CreateFromTask(AddGame);
         EditGameCommand = ReactiveCommand.CreateFromTask(EditGame);
@@ -54,7 +54,7 @@ public class GameListViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ChooseGameCommand { get; }
     public Interaction<GameConfigViewModel, Game?> ShowConfigDialog { get; }
     public Interaction<Game, bool> ShowRemoveDialog { get; }
-    public Interaction<ModListViewModel, bool> ShowModList {get;}
+    public Interaction<HomeViewModel, bool> ShowHomeView {get;}
 
     private async Task AddGame()
     {
@@ -101,9 +101,9 @@ public class GameListViewModel : ViewModelBase
 
     private async Task ChooseGame()
     {
-        ModListViewModel modListViewModel = new ModListViewModel();
-        modListViewModel.UpdateCurrentGame(SelectedGame);
-        await ShowModList.Handle(modListViewModel);
+        HomeViewModel homeViewModel = new HomeViewModel();
+        homeViewModel.UpdateGame(SelectedGame);
+        await ShowHomeView.Handle(homeViewModel);
     }
 
     private void SaveGameList(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

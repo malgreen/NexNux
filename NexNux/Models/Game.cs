@@ -51,7 +51,7 @@ public class Game
 
     public List<Mod?> GetActiveMods()
     {
-        return new List<Mod?>(_modList.Mods.Where(d => d != null && d.Enabled == true));
+        return new List<Mod?>(_modList.Mods.Where(d => d is {Enabled: true}));
     }
 
     /// <summary>
