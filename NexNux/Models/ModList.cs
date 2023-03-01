@@ -53,7 +53,7 @@ public class ModList
 
     public List<Mod?> GetActiveMods()
     {
-        return new List<Mod?>(Mods.Where(d => d != null && d.Enabled));
+        return new List<Mod?>(Mods.Where(d => d is {Enabled: true}));
     }
 
     public void InstallMod(Mod mod, string rootPath)

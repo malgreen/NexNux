@@ -1,17 +1,17 @@
 using Avalonia.Controls;
-using Material.Icons.Avalonia;
+using Material.Icons;
 
 namespace NexNux.Utilities;
 
 public class NexNuxTabItem
 {
-    public NexNuxTabItem(string header, MaterialIcon icon, UserControl contentControl)
+    public NexNuxTabItem(string header, MaterialIconKind icon, UserControl contentControl)
     {
         Header = header;
         Icon = icon;
         ContentControl = contentControl;
     }
     public string Header { get; }
-    public MaterialIcon Icon { get; }
+    public MaterialIconKind Icon { get; }
     public UserControl ContentControl { get; }
 }

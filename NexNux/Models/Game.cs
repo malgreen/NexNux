@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace NexNux.Models;
@@ -51,7 +50,7 @@ public class Game
 
     public List<Mod?> GetActiveMods()
     {
-        return new List<Mod?>(_modList.Mods.Where(d => d is {Enabled: true}));
+        return _modList.GetActiveMods();
     }
 
     /// <summary>

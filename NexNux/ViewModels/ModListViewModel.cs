@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ using System.Collections;
 using System.IO;
 using System.Reactive.Linq;
 using NexNux.Models;
-using NexNux.Utilities.ModDeployment;
 
 namespace NexNux.ViewModels;
 
@@ -23,20 +21,14 @@ public class ModListViewModel : ViewModelBase
         ShowModUninstallDialog = new Interaction<Mod, bool>();
         ShowErrorDialog = new Interaction<string, bool>();
         ShowModExistsDialog = new Interaction<Mod?, bool>();
-        IsDeployed = false; // Updated when changing game
-        DeploymentTotal = 1;
 
         VisibleMods = new ObservableCollection<Mod?>();
         VisibleMods.CollectionChanged += UpdateModList;
 
         InstallModCommand = ReactiveCommand.Create(InstallMod);
         UninstallModCommand = ReactiveCommand.Create(UninstallMod);
-        DeployModsCommand = ReactiveCommand.Create(DeployMods);
-        ClearModsCommand = ReactiveCommand.Create(ClearMods);
         this.WhenAnyValue(x => x.CurrentGame).Subscribe(_ => UpdateCurrentGame());
         this.WhenAnyValue(x => x.SelectedMod).Subscribe(_ => UpdateModInfo());
-        this.WhenAnyValue(x => x.IsDeployed).Subscribe(_ => UpdateDeploymentStatus());
-        this.WhenAnyValue(x => x.IsDeploying).Subscribe(_ => UpdateDeploymentStatus());
     }
 
     private Game? _currentGame;
@@ -74,49 +66,13 @@ public class ModListViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _modInfo, value);
     }
 
-    private bool _isDeployed;
-    public bool IsDeployed
-    {
-        get => _isDeployed;
-        set => this.RaiseAndSetIfChanged(ref _isDeployed, value);
-    }
-
-    private bool _isDeploying;
-    public bool IsDeploying
-    {
-        get => _isDeploying;
-        set => this.RaiseAndSetIfChanged(ref _isDeploying, value);
-    }
-
-    private string _deploymentStatus = null!;
-    public string DeploymentStatus
-    {
-        get => _deploymentStatus;
-        set => this.RaiseAndSetIfChanged(ref _deploymentStatus, value);
-    }
-
-    private double _deploymentProgress;
-    public double DeploymentProgress
-    {
-        get => _deploymentProgress;
-        set => this.RaiseAndSetIfChanged(ref _deploymentProgress, value);
-    }
-
-    private double _deploymentTotal;
-    public double DeploymentTotal
-    {
-        get => _deploymentTotal;
-        set => this.RaiseAndSetIfChanged(ref _deploymentTotal, value);
-    }
-
     public ReactiveCommand<Unit, Unit> InstallModCommand { get; }
     public ReactiveCommand<Unit, Unit> UninstallModCommand { get; }
-    public ReactiveCommand<Unit, Unit> DeployModsCommand { get; }
-    public ReactiveCommand<Unit, Unit> ClearModsCommand { get; }
     public Interaction<ModConfigViewModel, Mod?> ShowModInstallDialog { get; }
     public Interaction<Mod, bool> ShowModUninstallDialog { get; }
     public Interaction<string, bool> ShowErrorDialog { get; }
     public Interaction<Mod?, bool> ShowModExistsDialog { get; }
+    public event EventHandler<EventArgs>? ModListChanged;
 
 
     public void UpdateCurrentGame()
@@ -124,10 +80,10 @@ public class ModListViewModel : ViewModelBase
         if (CurrentGame == null) return;
         VisibleMods.CollectionChanged -= UpdateModList; //Not doing this might lead to memory leak
         CurrentModList = new ModList(CurrentGame.SettingsDirectory);
-
+        var previousVisibleMods = VisibleMods;
         VisibleMods = new ObservableCollection<Mod?>(CurrentModList.LoadList());
-        SetModListeners(VisibleMods, null!);
-        IsDeployed = CurrentGame.Settings.RecentlyDeployed;
+        
+        SetModListeners(VisibleMods, previousVisibleMods);
 
         VisibleMods.CollectionChanged += UpdateModList;
     }
@@ -252,7 +208,7 @@ public class ModListViewModel : ViewModelBase
     {
         UpdateModInfo();
         SaveVisibleList();
-        IsDeployed = false;
+        ModListChanged?.Invoke(this, e);
     }
 
     private void SaveVisibleList()
@@ -281,82 +237,5 @@ public class ModListViewModel : ViewModelBase
                 File.Move(file, targetFile);
             }
         }
-    }
-
-    private async void DeployMods()
-    {
-        if (CurrentGame == null) return;
-        try
-        {
-            IsDeploying = true;
-            DeploymentTotal = GetFileAmount(CurrentModList.GetActiveMods());
-            IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
-            modDeployer.FileDeployed += ModDeployer_FileDeployed;
-            await Task.Run(() => modDeployer.Deploy(CurrentModList.GetActiveMods()));
-            IsDeploying = false;
-            IsDeployed = true;
-            DeploymentProgress = 0;
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(e.StackTrace);
-            IsDeployed = false;
-            await ShowErrorDialog.Handle(e.Message);
-        }
-    }
-
-    private void ModDeployer_FileDeployed(object? sender, FileDeployedArgs e)
-    {
-        DeploymentProgress = e.Progress;
-    }
-
-    private async void ClearMods()
-    {
-        if (CurrentGame == null) return;
-        try
-        {
-            IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
-            modDeployer.Clear();
-            IsDeployed = false;
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(e.StackTrace);
-            await ShowErrorDialog.Handle(e.Message);
-        }
-    }
-
-    private void UpdateDeploymentStatus()
-    {
-        if (IsDeploying)
-        {
-            DeploymentStatus = "Deploying...";
-        }
-        else if (IsDeployed)
-        {
-            DeploymentStatus = "✔️ Mods deployed ✔️";
-        }
-        else
-        {
-            DeploymentStatus = "❌ Deployment needed ❌";
-        }
-            
-        if (CurrentGame == null) return;
-        CurrentGame.Settings.RecentlyDeployed = IsDeployed;
-        CurrentGame.Settings.Save();
-    }
-    private double GetFileAmount(List<Mod?> mods)
-    {
-        int amount = 0;
-        foreach (Mod? mod in mods)
-        {
-            if (mod == null) continue;
-            DirectoryInfo dir = new DirectoryInfo(mod.ModPath);
-            foreach (FileInfo _ in dir.GetFiles("*", SearchOption.AllDirectories))
-            {
-                amount++;
-            }
-        }
-        return amount;
     }
 }
