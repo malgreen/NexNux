@@ -49,7 +49,14 @@ public class HomeViewModel : ViewModelBase
         get => _tabItems;
         set => this.RaiseAndSetIfChanged(ref _tabItems, value);
     }
-    
+
+    private ModList _currentModList = null!;
+    public ModList CurrentModList
+    {
+        get => _currentModList;
+        set => this.RaiseAndSetIfChanged(ref _currentModList, value);
+    }
+
     private bool _isDeployed;
     public bool IsDeployed
     {
@@ -117,6 +124,7 @@ public class HomeViewModel : ViewModelBase
             CurrentGame = CurrentGame
         };
         modListViewModel.ModListChanged += ModListViewModel_OnModListChanged;
+        CurrentModList = modListViewModel.CurrentModList;
         ModListView modListView = new ModListView
         {
             DataContext = modListViewModel
@@ -129,6 +137,10 @@ public class HomeViewModel : ViewModelBase
     private void ModListViewModel_OnModListChanged(object? sender, EventArgs e)
     {
         IsDeployed = false;
+        if (sender is ModListViewModel mlvm)
+        {
+            CurrentModList = mlvm.CurrentModList;
+        }
     }
 
     private void InitializeSettingsTab()
@@ -144,10 +156,10 @@ public class HomeViewModel : ViewModelBase
         try
         {
             IsDeploying = true;
-            DeploymentTotal = GetFileAmount(CurrentGame.GetActiveMods());
+            DeploymentTotal = GetFileAmount(CurrentModList.GetActiveMods());
             IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
             modDeployer.FileDeployed += ModDeployer_FileDeployed;
-            await Task.Run(() => modDeployer.Deploy(CurrentGame.GetActiveMods()));
+            await Task.Run(() => modDeployer.Deploy(CurrentModList.GetActiveMods()));
             IsDeploying = false;
             IsDeployed = true;
             DeploymentProgress = 0;

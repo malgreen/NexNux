@@ -30,14 +30,28 @@ public sealed class SymLinkDeployer : IModDeployer
     private readonly string _jsonPath;
     private List<string> _deployedFiles;
     private List<string> _cachedFiles;
-
+    
+    /// <summary>
+    /// Creates a hard link using Windows DLL import, therefore this method only works on Windows.
+    /// Taken from https://stackoverflow.com/a/3387777
+    /// </summary>
+    /// <param name="lpFileName">Target path</param>
+    /// <param name="lpExistingFileName">Source path</param>
+    /// <param name="lpSecurityAttributes">Should be IntPtr.Zero</param>
+    /// <returns></returns>
+    [DllImport("Kernel32.dll", CharSet = CharSet.Unicode )]
+    static extern bool CreateHardLink(
+        string lpFileName,
+        string lpExistingFileName,
+        IntPtr lpSecurityAttributes
+    );
+    
     /// <summary>
     /// Deploys given list of files to the deployer's game's 'deploy' folder
     /// </summary>
     /// <param name="mods"></param>
     public Task Deploy(List<Mod?> mods)
     {
-        CheckAppPrivilege();
         LoadLinkedMods();
         RestoreCache();
         LinkMods(mods);
@@ -50,6 +64,7 @@ public sealed class SymLinkDeployer : IModDeployer
     /// </summary>
     public void Clear()
     {
+        LoadLinkedMods();
         RestoreCache();
     }
 
@@ -73,6 +88,7 @@ public sealed class SymLinkDeployer : IModDeployer
         }
 
         _deployedFiles = new List<string>();
+        SaveLinkedMods();
     }
 
     private void LinkMods(List<Mod?> mods)
@@ -111,10 +127,18 @@ public sealed class SymLinkDeployer : IModDeployer
         else if (File.Exists(finalPath) && _deployedFiles.Exists(p => p == finalPath))
         {
             File.Delete(finalPath);
+            _deployedFiles.Remove(finalPath);
         }
 
         Directory.CreateDirectory(Path.GetDirectoryName(finalPath) ?? throw new InvalidOperationException());
-        File.CreateSymbolicLink(finalPath, file.FullName);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            CreateHardLink(finalPath, file.FullName, IntPtr.Zero);
+        }
+        else
+        {
+            File.CreateSymbolicLink(finalPath, file.FullName);
+        }
         _deployedFiles.Add(finalPath);
     }
 
@@ -131,30 +155,6 @@ public sealed class SymLinkDeployer : IModDeployer
             SaveLinkedMods();
         string fileContent = File.ReadAllText(_jsonPath);
         _deployedFiles = JsonSerializer.Deserialize<List<string>>(fileContent) ?? throw new InvalidOperationException();
-    }
-
-    private void CheckAppPrivilege()
-    {
-        // Creating symbolic links in Windows requires admin rights
-        // Taken from https://stackoverflow.com/a/52745016
-        string name = AppDomain.CurrentDomain.FriendlyName;
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
-            {
-                WindowsPrincipal principal = new WindowsPrincipal(identity);
-                if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
-                {
-                    throw new InvalidOperationException($"Application must be run as administrator. Right click the {name} file and select 'run as administrator'.");
-                }
-            }
-        }
-        // Linux doesn't require admin rights for symlinks, so this check is not needed AFAIK
-        //else
-        //{
-        //    throw new InvalidOperationException($"Application must be run as root/sudo. From terminal, run the executable as 'sudo {name}'");
-        //}
     }
 
     private void OnFileLinked(FileDeployedArgs e)

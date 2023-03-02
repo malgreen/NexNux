@@ -184,6 +184,7 @@ public class ModListViewModel : ViewModelBase
         }
         SetModListeners(e.NewItems, e.OldItems);
         SaveVisibleList();
+        ModListChanged?.Invoke(this, e);
     }
 
     private void SetModListeners(IList? newItems, IList? oldItems)
