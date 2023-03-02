@@ -10,8 +10,8 @@
         Title="{Binding CurrentTitle}">
   <Grid>
     <Grid.RowDefinitions>
-      <RowDefinition Height="1*"></RowDefinition>
       <RowDefinition Height="50"></RowDefinition>
+      <RowDefinition Height="1*"></RowDefinition>
     </Grid.RowDefinitions>
 
     <NativeMenu.Menu>
@@ -21,7 +21,7 @@
     </NativeMenu.Menu>
 
     <TabControl Name="HomeTabs" 
-                Grid.Row="0" 
+                Grid.Row="1" 
                 TabStripPlacement="Left"
                 Items="{Binding TabItems}">
       
@@ -30,7 +30,9 @@
         <Style Selector="TabControl WrapPanel">
           <Setter Property="Background" Value="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"/>
         </Style>
-        
+        <Style Selector="TabControl Border">
+          <Setter Property="Margin" Value="0,0,4,0"></Setter>
+        </Style>
         <Style Selector="TabItem:selected /template/ Border#PART_SelectedPipe">
           <Setter Property="IsVisible" Value="False"/>
         </Style>
@@ -51,7 +53,7 @@
         <DataTemplate>
           <Border Tag="PART_TabItemBorder">
             <StackPanel Orientation="Horizontal">
-              <material:MaterialIcon Kind="{Binding Icon}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+              <material:MaterialIcon Kind="{Binding Icon}" Margin="0,0,6,0" VerticalAlignment="Center"/>
               <TextBlock Text="{Binding Header}" FontWeight="Medium" FontSize="18" VerticalAlignment="Center"/>
             </StackPanel>
           </Border>
@@ -66,39 +68,43 @@
       
     </TabControl>
     
-    <DockPanel Grid.Row="1"
-               Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
-      
-      <Border Padding="10,10,0,10" DockPanel.Dock="Left">
-        <Button Command="{Binding DeployModsCommand}">
-          <StackPanel Orientation="Horizontal">
+    <Panel Grid.Row="0"
+           Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+        
+        <Button Command="{Binding DeployModsCommand}" IsEnabled="{Binding !IsDeploying}" Width="100">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <material:MaterialIcon Kind="ContentSave" Margin="0,0,8,0"/>
             <TextBlock Text="Deploy" FontSize="14" FontWeight="Bold"/>
           </StackPanel>
         </Button>
-      </Border>
-      
-      <Border Padding="0,10" DockPanel.Dock="Bottom">
-        <DockPanel>
-          <ProgressBar Value="{Binding DeploymentProgress}" 
-                       Maximum="{Binding DeploymentTotal}"
-                       DockPanel.Dock="Top" 
-                       HorizontalAlignment="Center"
-                       />
-          <StackPanel Orientation="Horizontal"
-                      VerticalAlignment="Center"
-                      HorizontalAlignment="Center"
-                      DockPanel.Dock="Bottom" >
-            <material:MaterialIcon Kind="{Binding DeploymentStatusIcon}"/>
-            <TextBlock Text="{Binding DeploymentStatus}" 
-                       FontWeight="Medium" 
-                       />
-            <material:MaterialIcon Kind="{Binding DeploymentStatusIcon}"/>
-          </StackPanel>
-        </DockPanel>
-      </Border>
         
-    </DockPanel>
-    
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center">
+          <StackPanel Spacing="8">
+            <ProgressBar Value="{Binding DeploymentProgress}" 
+                         Maximum="{Binding DeploymentTotal}"
+                         HorizontalAlignment="Center"
+            />
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+              <material:MaterialIcon Kind="{Binding DeploymentStatusIcon}" Margin="8, 0"/>
+              <TextBlock Text="{Binding DeploymentStatus}" 
+                         FontWeight="Medium" 
+              />
+              <material:MaterialIcon Kind="{Binding DeploymentStatusIcon}" Margin="8, 0"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+        
+        <Button Command="{Binding ClearModsCommand}" IsEnabled="{Binding !IsDeploying}" Width="100">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Text="Clear" FontSize="14" FontWeight="Bold"/>
+            <material:MaterialIcon Kind="Restore" Margin="8,0,0,0"/>
+          </StackPanel>
+        </Button>
+        
+      </StackPanel>
+    </Panel>
   </Grid>
 </Window>
