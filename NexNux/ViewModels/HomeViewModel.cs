@@ -6,6 +6,7 @@ using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Material.Icons;
 using NexNux.Models;
 using NexNux.Utilities;
@@ -145,7 +146,7 @@ public class HomeViewModel : ViewModelBase
 
     private void InitializeSettingsTab()
     {
-        NexNuxTabItem settingsTabItem = new NexNuxTabItem("Settings", MaterialIconKind.Settings, null);
+        NexNuxTabItem settingsTabItem = new NexNuxTabItem("Settings", MaterialIconKind.Settings, new UserControl());
         TabItems.Add(settingsTabItem);
     }
     

@@ -47,7 +47,8 @@ public sealed class SymLinkDeployer : IModDeployer
     );
     
     /// <summary>
-    /// Deploys given list of files to the deployer's game's 'deploy' folder
+    /// Deploys given list of files to the deployer's game's 'deploy' folder.
+    /// If the current platform is Windows, this will be done using HardLinks, on other platforms it will use SymLinks.
     /// </summary>
     /// <param name="mods"></param>
     public Task Deploy(List<Mod?> mods)
