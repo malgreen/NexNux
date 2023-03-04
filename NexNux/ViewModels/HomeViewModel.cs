@@ -145,7 +145,6 @@ public class HomeViewModel : ViewModelBase
 
     private void InitializeSettingsTab()
     {
-
         NexNuxTabItem settingsTabItem = new NexNuxTabItem("Settings", MaterialIconKind.Settings, null);
         TabItems.Add(settingsTabItem);
     }
@@ -197,9 +196,11 @@ public class HomeViewModel : ViewModelBase
         if (CurrentGame == null) return;
         try
         {
+            IsDeploying = true;
             IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
-            modDeployer.Clear();
+            await Task.Run(() => modDeployer.Clear());
             IsDeployed = false;
+            IsDeploying = false;
         }
         catch (Exception e)
         {

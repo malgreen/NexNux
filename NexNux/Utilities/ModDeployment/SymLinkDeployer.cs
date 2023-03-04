@@ -62,10 +62,11 @@ public sealed class SymLinkDeployer : IModDeployer
     /// <summary>
     /// Purges all deployed files from the deployer's game's 'deploy' folder
     /// </summary>
-    public void Clear()
+    public Task Clear()
     {
         LoadLinkedMods();
         RestoreCache();
+        return Task.CompletedTask;
     }
 
     /// <summary>
