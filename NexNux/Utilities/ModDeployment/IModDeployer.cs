@@ -10,5 +10,5 @@ public interface IModDeployer
     public event EventHandler<FileDeployedArgs> FileDeployed; 
     public Game CurrentGame { get; }
     public Task Deploy(List<Mod?> mods);
-    public void Clear();
+    public Task Clear();
 }

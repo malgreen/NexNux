@@ -24,7 +24,7 @@
               Margin="0,10,10,10" 
               CornerRadius="3" 
               BorderBrush="{DynamicResource SystemChromeGrayColor}" 
-              BorderThickness="2">
+              BorderThickness="1">
         <Canvas Name="GridModsCanvas" Width="{Binding $parent[Border].Bounds.Width}" Height="{Binding $parent[Border].Bounds.Height}">
           <DataGrid   Name="GridMods"
 								Background="Transparent"
@@ -43,7 +43,7 @@
               <Style Selector="DataGridColumnHeader">
                 <Setter Property="IsHitTestVisible" Value="False" />
                 <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Padding" Value="2"/>
                 <Setter Property="DragDrop.AllowDrop" Value="False" />
               </Style>
               <Style Selector="DataGridColumnHeader TextBlock">
@@ -60,9 +60,10 @@
               <DataGridTextColumn Header="Name" Binding="{Binding ModName}" Width="3*" CanUserResize="True" IsReadOnly="True"/>
               <DataGridTextColumn Header="Size (mb)" Binding="{Binding FileSize}" Width="2*" CanUserResize="True" IsReadOnly="True" />
               <!-- The next column is much the same as a CheckBoxColumn, but it doesn't need to be double clicked to be changed -->
+              <!-- The checkbox is cut off/clipped on the left side. The current (hacky) workaround is to not set it to clip to bounds. -->
               <DataGridTemplateColumn Header="Enabled" Width="1*" CanUserResize="False">
                 <DataTemplate>
-                  <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center" />
+                  <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center" ClipToBounds="False" />
                 </DataTemplate>
               </DataGridTemplateColumn>
             </DataGrid.Columns>

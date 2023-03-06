@@ -70,9 +70,14 @@
     
     <Panel Grid.Row="0"
            Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+      
+      <Border HorizontalAlignment="Left" VerticalAlignment="Center" Padding="10">
+        <TextBlock Text="{Binding CurrentGame}" FontWeight="Black" FontSize="22" />
+      </Border>
+      
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
         
-        <Button Command="{Binding DeployModsCommand}" IsEnabled="{Binding !IsDeploying}" Width="100">
+        <Button Command="{Binding DeployModsCommand}" Classes="accent" IsEnabled="{Binding !IsDeploying}" Width="100">
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <material:MaterialIcon Kind="ContentSave" Margin="0,0,8,0"/>
             <TextBlock Text="Deploy" FontSize="14" FontWeight="Bold"/>
