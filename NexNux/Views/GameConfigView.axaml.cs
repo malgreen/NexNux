@@ -24,6 +24,7 @@ public partial class GameConfigView : ReactiveWindow<GameConfigViewModel>
         this.WhenActivated(d => d(ViewModel!.ShowErrorDialog.RegisterHandler(DoShowErrorDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowDeployFolderDialog.RegisterHandler(DoShowDeployFolderDialog)));
         this.WhenActivated(d => d(ViewModel!.ShowModsFolderDialog.RegisterHandler(DoShowModsFolderDialog)));
+        this.WhenActivated(d => d(ViewModel!.ShowAppDataFolderDialog.RegisterHandler(DoShowAppDataFolderDialog)));
 #if DEBUG
         this.AttachDevTools();
 #endif
@@ -52,6 +53,13 @@ public partial class GameConfigView : ReactiveWindow<GameConfigViewModel>
     {
         OpenFolderDialog openFolderDialog = new OpenFolderDialog();
         openFolderDialog.Title = "Choose mods folder";
+        interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
+    }
+    
+    private async Task DoShowAppDataFolderDialog(InteractionContext<Unit, string> interactionContext)
+    {
+        OpenFolderDialog openFolderDialog = new OpenFolderDialog();
+        openFolderDialog.Title = "Choose the AppData folder for this game";
         interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
     }
 

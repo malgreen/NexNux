@@ -62,12 +62,12 @@ public class GameList
         return loadedGames;
     }
 
-    public void ModifyGame(string gameName, string deployDir, string modDir)
+    public void ModifyGame(string gameName, GameType gameType, string deployDir, string modDir, string? appDataDir)
     {
         // Maybe there should be a try-catch within this?
         if (DirsInUse(deployDir, modDir))
             throw new Exception("Directories already in use");
-        Game game = new Game(gameName, deployDir, modDir);
+        Game game = new Game(gameName, gameType, deployDir, modDir, appDataDir);
         Games.Remove(game); // This does not currently use the RemoveGame method because that would delete everything,
                             // not sure if modifying game dirs should be supported at the minute
         Games.Add(game);

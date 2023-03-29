@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
+using Material.Icons;
 
 namespace NexNux.Utilities;
 

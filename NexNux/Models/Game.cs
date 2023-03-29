@@ -2,31 +2,41 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Serialization;
+using NexNux.Models.Gamebryo;
 
 namespace NexNux.Models;
 
 public class Game
 {
-    public Game(string gameName, string deployDirectory, string modsDirectory)
+    public Game(string gameName, GameType type, string deployDirectory, string modsDirectory, string? appDataDirectory)
     {
         GameName = gameName;
+        Type = type;
         DeployDirectory = deployDirectory;
         ModsDirectory = modsDirectory;
         SettingsDirectory = Path.Combine(ModsDirectory, ".NexNux");
+        AppDataDirectory = appDataDirectory;
         ValidateInfo();
 
         Settings = new GameSettings(SettingsDirectory ?? throw new InvalidOperationException());
         _modList = new ModList(SettingsDirectory ?? throw new InvalidOperationException());
+        if (Type is GameType.BGS or GameType.BGSPostSkyrim && AppDataDirectory is not null)
+        {
+            _gamebryoPluginList = new GamebryoPluginList(DeployDirectory, SettingsDirectory, AppDataDirectory, Type);
+        }
     }
 
     public string GameName { get; set; }
+    public GameType Type { get; set; }
     public string DeployDirectory { get; set; }
     public string ModsDirectory { get; set; }
     public string SettingsDirectory { get; set; }
+    public string? AppDataDirectory { get; set; }
 
     [JsonIgnore]
     public GameSettings Settings { get; private set; }
     private ModList _modList;
+    private GamebryoPluginList? _gamebryoPluginList;
 
     void ValidateInfo()
     {

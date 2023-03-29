@@ -80,7 +80,7 @@ public class ModListViewModel : ViewModelBase
         if (CurrentGame == null) return;
         VisibleMods.CollectionChanged -= UpdateModList; //Not doing this might lead to memory leak
         CurrentModList = new ModList(CurrentGame.SettingsDirectory);
-        var previousVisibleMods = VisibleMods;
+        ObservableCollection<Mod?> previousVisibleMods = VisibleMods;
         VisibleMods = new ObservableCollection<Mod?>(CurrentModList.LoadList());
         
         SetModListeners(VisibleMods, previousVisibleMods);

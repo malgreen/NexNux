@@ -64,7 +64,7 @@ public class GameListViewModel : ViewModelBase
             Game? result = await ShowConfigDialog.Handle(config);
             if (result == null) return;
 
-            MainGameList.ModifyGame(result.GameName, result.DeployDirectory, result.ModsDirectory);
+            MainGameList.ModifyGame(result.GameName, result.Type, result.DeployDirectory, result.ModsDirectory, result.AppDataDirectory);
             Games = new ObservableCollection<Game>(MainGameList.Games); // There might very well be a better way to do this
         }
         catch (Exception ex)
