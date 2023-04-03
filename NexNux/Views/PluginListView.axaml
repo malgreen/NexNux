@@ -74,10 +74,13 @@
         <Panel IsEnabled="{Binding Busy}"
                IsVisible="{Binding Busy}"
                Background="Gray"
-               Opacity="950"
+               Opacity="80"
                Width="{Binding $parent[Border].Bounds.Width}"
                Height="{Binding $parent[Border].Bounds.Height}">
-          <material:MaterialIcon Kind="Timelapse"  />
+          <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <material:MaterialIcon Kind="WarningBox" Height="20" Width="20" />
+            <Label Content="{Binding BusyMessage}" FontWeight="Black" FontSize="20" />
+          </StackPanel>
         </Panel>
         
       </Canvas>

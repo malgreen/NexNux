@@ -14,6 +14,7 @@ public class PluginListViewModel : ViewModelBase
     public PluginListViewModel()
     {
         Busy = false;
+        BusyMessage = "";
         ShowErrorDialog = new Interaction<string, bool>();
         this.WhenAnyValue(x => x.CurrentGame).Subscribe(_ => UpdateCurrentGame());
     }
@@ -51,6 +52,13 @@ public class PluginListViewModel : ViewModelBase
     {
         get => _busy;
         set => this.RaiseAndSetIfChanged(ref _busy, value);
+    }
+
+    private string _busyMessage;
+    public string BusyMessage
+    {
+        get => _busyMessage;
+        set => this.RaiseAndSetIfChanged(ref _busyMessage, value);
     }
     
     public Interaction<string, bool> ShowErrorDialog { get; }
@@ -103,6 +111,7 @@ public class PluginListViewModel : ViewModelBase
         // This should only handled the enabled status, as it should only be run once to avoid writing the file 
         // at the same time
         if (e.PropertyName != "Enabled") return;
+        BusyMessage = "Saving...";
         Busy = true;
         CurrentPluginList.Plugins = VisiblePlugins;
         await Task.Run(() => CurrentPluginList.Synchronize());

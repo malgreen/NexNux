@@ -107,6 +107,10 @@ public class HomeViewModel : ViewModelBase
         get => _deploymentTotal;
         set => this.RaiseAndSetIfChanged(ref _deploymentTotal, value);
     }
+
+    private ModListViewModel? _modListViewModel;
+    private PluginListViewModel? _pluginListViewModel;
+    
     public ReactiveCommand<Unit, Unit> DeployModsCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearModsCommand { get; }
     public Interaction<string, bool> ShowErrorDialog { get; }
@@ -132,15 +136,15 @@ public class HomeViewModel : ViewModelBase
 
     private void InitializeModsTab()
     {
-        ModListViewModel modListViewModel = new ModListViewModel()
+        _modListViewModel = new ModListViewModel()
         {
             CurrentGame = CurrentGame
         };
-        modListViewModel.ModListChanged += ModListViewModel_OnModListChanged;
-        CurrentModList = modListViewModel.CurrentModList;
+        _modListViewModel.ModListChanged += ModListViewModel_OnModListChanged;
+        CurrentModList = _modListViewModel.CurrentModList;
         ModListView modListView = new ModListView
         {
-            DataContext = modListViewModel
+            DataContext = _modListViewModel
         };
 
         NexNuxTabItem modsTabItem = new NexNuxTabItem("Mods", MaterialIconKind.Plugin, modListView);
@@ -159,14 +163,14 @@ public class HomeViewModel : ViewModelBase
     private void InitializePluginsTab()
     {
         if (CurrentGame == null || CurrentGame.AppDataDirectory == null) return;
-        PluginListViewModel pluginListViewModel = new PluginListViewModel()
+        _pluginListViewModel = new PluginListViewModel()
         {
             CurrentGame = CurrentGame
         };
-        CurrentPluginList = pluginListViewModel.CurrentPluginList;
+        CurrentPluginList = _pluginListViewModel.CurrentPluginList;
         PluginListView pluginListView = new PluginListView()
         {
-            DataContext = pluginListViewModel
+            DataContext = _pluginListViewModel
         };
         
         NexNuxTabItem pluginsTabItem = new NexNuxTabItem("Plugins", MaterialIconKind.FormatListBulleted, pluginListView);
@@ -274,6 +278,11 @@ public class HomeViewModel : ViewModelBase
         if (CurrentGame == null) return;
         CurrentGame.Settings.RecentlyDeployed = IsDeployed;
         CurrentGame.Settings.Save();
+        if (_pluginListViewModel != null)
+        {
+            _pluginListViewModel.BusyMessage = "Please deploy before managing plugins.";
+            _pluginListViewModel.Busy = !IsDeployed;
+        }
     }
 }
 

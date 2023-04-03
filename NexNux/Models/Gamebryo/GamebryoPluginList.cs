@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace NexNux.Models.Gamebryo;
 
@@ -23,6 +22,7 @@ public class GamebryoPluginList
         _deployDirPath = deployDir;
         _pluginListFileName = Path.Combine(settingsDir, "PluginList.json");
         _pluginsTxtPath = Path.Combine(appDataDir, "plugins.txt");
+        _loadorderTxtPath = Path.Combine(appDataDir, "loadorder.txt");
         _gameType = gameType;
         Plugins = new ObservableCollection<GamebryoPlugin>();
         Load();
@@ -33,6 +33,7 @@ public class GamebryoPluginList
     private Dictionary<string, GamebryoPluginType> _pluginTypeDictionary;
     private string _pluginListFileName;
     private string _pluginsTxtPath;
+    private string _loadorderTxtPath;
     private string _deployDirPath;
 
     public void Save() 
@@ -40,24 +41,39 @@ public class GamebryoPluginList
         using FileStream createStream = File.Create(_pluginListFileName);
         JsonSerializer.Serialize(createStream, Plugins, new JsonSerializerOptions(){ WriteIndented = true });
         createStream.Dispose();
-        SavePluginsToFile(_pluginsTxtPath);
+        SetIndices();
+        SetPluginTimeStamps();
+        SavePluginsToFile(_pluginsTxtPath, _gameType == GameType.BGSPostSkyrim);
+        SavePluginsToFile(_loadorderTxtPath, false);
     }
 
     public void Load()
     {
         if (!File.Exists(_pluginsTxtPath))
         {
-            throw new Exception("App Data directory setting incorrect.");
+            File.Create(_pluginsTxtPath);
         }
-        if (!File.Exists(_pluginListFileName))
+
+        if (!File.Exists(_loadorderTxtPath))
+        {
+            File.Create(_loadorderTxtPath);
+        }
+
+        try
+        {
+            string jsonString = File.ReadAllText(_pluginListFileName);
+            Plugins = JsonSerializer.Deserialize<ObservableCollection<GamebryoPlugin>>(jsonString) ??
+                      throw new InvalidOperationException();
+        }
+        catch (FileNotFoundException)
         {
             Plugins = new ObservableCollection<GamebryoPlugin>(GetPluginsFromFile(_pluginsTxtPath));
         }
-        else
+        catch (JsonException)
         {
-            string jsonString = File.ReadAllText(_pluginListFileName);
-            Plugins = JsonSerializer.Deserialize<ObservableCollection<GamebryoPlugin>>(jsonString) ?? throw new InvalidOperationException();
+            File.Delete(_pluginListFileName);
         }
+
         Refresh();
         Synchronize();
     }
@@ -76,7 +92,6 @@ public class GamebryoPluginList
             Plugins.Move(pluginIndexInFullList, pluginIndexInFile + indexDifference);
             enabledPlugins = Plugins.Where(plugin => plugin.IsEnabled).ToList();
         }
-        SetIndices();
         Save();
     }
 
@@ -94,19 +109,18 @@ public class GamebryoPluginList
         // These plugins can just be added to the list
         List<GamebryoPlugin> newPlugins = deployDirPlugins.Except(pluginsFilePlugins).ToList();
         Plugins.AddRange(newPlugins);
-
-        SetIndices();
+        
         Save();
     }
 
-    private void SavePluginsToFile(string filePath)
+    private void SavePluginsToFile(string filePath, bool asterixPrefix)
     {
         using (StreamWriter streamWriter = new StreamWriter(filePath))
         {
             foreach(GamebryoPlugin plugin in Plugins)
             {
                 if (!plugin.IsEnabled) continue;
-                string pluginName = _gameType == GameType.BGS ? plugin.PluginName : string.Join("*", plugin.PluginName);
+                string pluginName = asterixPrefix ? string.Join("*", plugin.PluginName) : plugin.PluginName;
                 streamWriter.WriteLine(pluginName);
             }
         }
@@ -144,6 +158,15 @@ public class GamebryoPluginList
         foreach (GamebryoPlugin plugin in Plugins)
         {
             plugin.LoadOrderIndex = Plugins.IndexOf(plugin);
+        }
+    }
+
+    private void SetPluginTimeStamps()
+    {
+        foreach (GamebryoPlugin plugin in Plugins)
+        {
+            string pluginPath = Path.Combine(_deployDirPath, plugin.PluginName);
+            File.SetLastWriteTime(pluginPath, DateTime.Now);
         }
     }
 }
