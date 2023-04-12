@@ -22,6 +22,7 @@ namespace NexNux.Views;
 public partial class ModListView : ReactiveUserControl<ModListViewModel>
 {
     Point? _dragStartPoint;
+    private bool _isDragging;
     public ModListView()
     {
         InitializeComponent();
@@ -30,6 +31,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
         this.WhenActivated(d => d(ViewModel!.ShowErrorDialog.RegisterHandler(DoShowErrorDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowModExistsDialog.RegisterHandler(DoShowModExistsDialogAsync)));
         SetupGridHandlers();
+        _isDragging = false;
     }
 
     private void InitializeComponent()
@@ -51,8 +53,10 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
     {
         // Workaround for the 'DragLeave' event not being fired, so the drop indicator line is only removed
         // after moving the mouse back into the datagrid, after dropping outside of it
+        // This is broken on Linux
         ClearDropPoint();
         _dragStartPoint = null;
+        _isDragging = false;
     }
 
     private void DataGrid_DragOver(object? sender, DragEventArgs e)
@@ -74,21 +78,22 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
     private void DataGrid_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         _dragStartPoint = null;
+        _isDragging = false;
+        ClearDropPoint();
     }
 
     private void DataGrid_PointerMoved(object? sender, PointerEventArgs e)
     {
-        if (_dragStartPoint == null) return; // Basically '!IsDragging', it's modified in the PointerPressed and PointerReleased
-
+        if (_dragStartPoint == null) return;
+        if (_isDragging) return;
         if (sender is DataGrid)
         {
             Point mousePosition = e.GetPosition(null);
             Vector positionDiff = _dragStartPoint.Value - mousePosition;
+            
+            bool draggedEnough = Math.Abs(positionDiff.X) > 4 || Math.Abs(positionDiff.Y) > 4;
 
-            bool draggedEnoughX = Math.Abs(positionDiff.X) > 4;
-            bool draggedEnoughY = Math.Abs(positionDiff.Y) > 4;
-
-            if (draggedEnoughX || draggedEnoughY)
+            if (draggedEnough && !_isDragging)
             {
                 // Get the dragged row
                 DataGridRow? sourceRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
@@ -107,6 +112,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
                 dataObject.Set("DragSource", sourceRow);
                 
                 DragDrop.DoDragDrop(e, dataObject, DragDropEffects.Move);
+                _isDragging = true;
             }
         }
     }
@@ -116,6 +122,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
         if(sender is DataGrid && DataContext is ModListViewModel mlvm)
         {
             _dragStartPoint = null;
+            _isDragging = false;
 
             // Retrieve we put into the DataModel
             Mod? draggedMod = e.Data.Get("DraggedMod") as Mod;
@@ -213,8 +220,8 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
     {
         if (sourceRow == null || targetRow == null) return;
 
-        Point startPoint = new Point(0, 0);
-        Point endPoint = new Point(0, 0);
+        Point startPoint;
+        Point endPoint;
 
         // When moving row 'down', it moves them to the index after the target
         if (targetRow.GetIndex() > sourceRow.GetIndex())
@@ -233,17 +240,17 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
 
             startPoint = new Point(targetRow.Bounds.TopLeft.X, startPointY);
             endPoint = new Point(targetRow.Bounds.TopRight.X, endPointY);
-        }        
+        }
 
-        Line line = new Line()
+        Line line = new Line
         {
             Tag = "tempLine",
             StartPoint = startPoint,
             EndPoint = endPoint,
             Stroke = Brushes.Gray,
-            StrokeThickness = 1
+            StrokeThickness = 1,
+            IsEnabled = false // So we can't drop on the actual indicator
         };
-        line.IsEnabled = false; // So we can't drop on the actual indicator
         this.GetControl<Canvas>("GridModsCanvas").Children.Add(line);
     }
 
