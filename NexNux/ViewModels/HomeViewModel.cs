@@ -195,9 +195,10 @@ public class HomeViewModel : ViewModelBase
             modDeployer.FileDeployed += ModDeployer_FileDeployed;
             await Task.Run(() => modDeployer.Deploy(CurrentModList.GetActiveMods()));
 
-            if (CurrentGame.Type != GameType.Generic)
+            if (CurrentGame.Type != GameType.Generic && _pluginListViewModel != null)
             {
                 await Task.Run(() => CurrentPluginList.Synchronize());
+                _pluginListViewModel.UpdateCurrentGame();
             }
 
             IsDeploying = false;

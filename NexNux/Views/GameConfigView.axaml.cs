@@ -25,14 +25,6 @@ public partial class GameConfigView : ReactiveWindow<GameConfigViewModel>
         this.WhenActivated(d => d(ViewModel!.ShowDeployFolderDialog.RegisterHandler(DoShowDeployFolderDialog)));
         this.WhenActivated(d => d(ViewModel!.ShowModsFolderDialog.RegisterHandler(DoShowModsFolderDialog)));
         this.WhenActivated(d => d(ViewModel!.ShowAppDataFolderDialog.RegisterHandler(DoShowAppDataFolderDialog)));
-#if DEBUG
-        this.AttachDevTools();
-#endif
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
     }
 
     private async Task DoShowErrorDialogAsync(InteractionContext<string, string> interactionContext)

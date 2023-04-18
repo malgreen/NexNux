@@ -33,14 +33,14 @@ public class PluginListViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _currentPluginList, value);
     }
 
-    private ObservableCollection<GamebryoPlugin> _visiblePlugins;
+    private ObservableCollection<GamebryoPlugin> _visiblePlugins = null!;
     public ObservableCollection<GamebryoPlugin> VisiblePlugins
     {
         get => _visiblePlugins;
         set => this.RaiseAndSetIfChanged(ref _visiblePlugins, value);
     }
 
-    private GamebryoPlugin _selectedPlugin;
+    private GamebryoPlugin _selectedPlugin = null!;
     public GamebryoPlugin SelectedPlugin
     {
         get => _selectedPlugin;
@@ -54,7 +54,7 @@ public class PluginListViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _busy, value);
     }
 
-    private string _busyMessage;
+    private string _busyMessage = null!;
     public string BusyMessage
     {
         get => _busyMessage;
@@ -64,7 +64,7 @@ public class PluginListViewModel : ViewModelBase
     public Interaction<string, bool> ShowErrorDialog { get; }
     public event EventHandler<EventArgs>? PluginListChanged;
     
-    private void UpdateCurrentGame()
+    public void UpdateCurrentGame()
     {
         if (CurrentGame == null || CurrentGame.AppDataDirectory == null) return;
         CurrentPluginList = new GamebryoPluginList(

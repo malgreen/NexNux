@@ -24,7 +24,6 @@
                   Width="{Binding $parent[Border].Bounds.Width}"
                   Height="{Binding $parent[Border].Bounds.Height}"
                   Background="Transparent"
-                  AlternatingRowBackground="{DynamicResource SystemRevealListLowColor}"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="False"
                   CanUserReorderColumns="False"

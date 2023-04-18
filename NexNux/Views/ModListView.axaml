@@ -34,8 +34,7 @@
 								CanUserReorderColumns="False"
 								SelectedItem="{Binding SelectedMod, Mode=TwoWay}"
 								SelectionMode="Single"
-								AlternatingRowBackground="{DynamicResource SystemRevealListLowColor}"
-								Width="{Binding $parent[Border].Bounds.Width}"
+                Width="{Binding $parent[Border].Bounds.Width}"
 								Height="{Binding $parent[Border].Bounds.Height}"
 								>
             <DataGrid.Styles>

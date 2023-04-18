@@ -1,4 +1,3 @@
-using AvaloniaEdit.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -108,8 +107,7 @@ public class GamebryoPluginList
         // Get new plugins that are present in the deploy directory, but not in the file
         // These plugins can just be added to the list
         List<GamebryoPlugin> newPlugins = deployDirPlugins.Except(pluginsFilePlugins).ToList();
-        Plugins.AddRange(newPlugins);
-        
+        Plugins = new ObservableCollection<GamebryoPlugin>(Plugins.Union(newPlugins).ToList());
         Save();
     }
 

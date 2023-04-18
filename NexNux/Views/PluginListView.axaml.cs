@@ -21,11 +21,6 @@ public partial class PluginListView : UserControl
         _isDragging = false;
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-    
     Point? _dragStartPoint;
     private bool _isDragging;
 
@@ -36,7 +31,7 @@ public partial class PluginListView : UserControl
         this.GetControl<DataGrid>("PluginsGrid").AddHandler(PointerReleasedEvent, DataGrid_PointerReleased);
         this.GetControl<DataGrid>("PluginsGrid").CellPointerPressed += DataGridCell_PointerPressed;
         this.GetControl<DataGrid>("PluginsGrid").AddHandler(DragDrop.DragOverEvent, DataGrid_DragOver);
-        this.GetControl<DataGrid>("PluginsGrid").AddHandler(PointerEnterEvent, DataGrid_PointerEnter);
+        this.GetControl<DataGrid>("PluginsGrid").AddHandler(PointerEnteredEvent, DataGrid_PointerEnter);
     }
     
     private void DataGrid_PointerEnter(object? sender, PointerEventArgs e)
@@ -52,7 +47,7 @@ public partial class PluginListView : UserControl
     private void DataGrid_DragOver(object? sender, DragEventArgs e)
     {
         ClearDropPoint();
-        DataGridRow? targetRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
+        DataGridRow? targetRow = ((Control)e.Source!).GetSelfAndVisualAncestors()
                                                         .OfType<DataGridRow>()
                                                         .FirstOrDefault();
         ShowDropPoint(e.Data.Get("DragSource") as DataGridRow, targetRow);
@@ -86,7 +81,7 @@ public partial class PluginListView : UserControl
             if (draggedEnough && !_isDragging)
             {
                 // Get the dragged row
-                DataGridRow? sourceRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
+                DataGridRow? sourceRow = ((Control)e.Source!).GetSelfAndVisualAncestors()
                                                             .OfType<DataGridRow>()
                                                             .FirstOrDefault();
                 if (sourceRow == null) return;
@@ -119,7 +114,7 @@ public partial class PluginListView : UserControl
             if (draggedPlugin == null) return;
 
             // Get targetRow by the drop position
-            DataGridRow? targetRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
+            DataGridRow? targetRow = ((Control)e.Source!).GetSelfAndVisualAncestors()
                                                             .OfType<DataGridRow>()
                                                             .FirstOrDefault();
 

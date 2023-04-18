@@ -16,13 +16,12 @@ using System.Linq;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 
 namespace NexNux.Views;
 
 public partial class ModListView : ReactiveUserControl<ModListViewModel>
 {
-    Point? _dragStartPoint;
-    private bool _isDragging;
     public ModListView()
     {
         InitializeComponent();
@@ -33,11 +32,9 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
         SetupGridHandlers();
         _isDragging = false;
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    
+    Point? _dragStartPoint;
+    private bool _isDragging;
 
     private void SetupGridHandlers()
     {
@@ -46,7 +43,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
         this.GetControl<DataGrid>("GridMods").AddHandler(PointerReleasedEvent, DataGrid_PointerReleased);
         this.GetControl<DataGrid>("GridMods").CellPointerPressed += DataGridCell_PointerPressed;
         this.GetControl<DataGrid>("GridMods").AddHandler(DragDrop.DragOverEvent, DataGrid_DragOver);
-        this.GetControl<DataGrid>("GridMods").AddHandler(PointerEnterEvent, DataGrid_PointerEnter);
+        this.GetControl<DataGrid>("GridMods").AddHandler(PointerEnteredEvent, DataGrid_PointerEnter);
     }
 
     private void DataGrid_PointerEnter(object? sender, PointerEventArgs e)
@@ -62,7 +59,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
     private void DataGrid_DragOver(object? sender, DragEventArgs e)
     {
         ClearDropPoint();
-        DataGridRow? targetRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
+        DataGridRow? targetRow = ((Control)e.Source!).GetSelfAndVisualAncestors()
                                                         .OfType<DataGridRow>()
                                                         .FirstOrDefault();
         ShowDropPoint(e.Data.Get("DragSource") as DataGridRow, targetRow);
@@ -96,7 +93,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
             if (draggedEnough && !_isDragging)
             {
                 // Get the dragged row
-                DataGridRow? sourceRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
+                DataGridRow? sourceRow = ((Control)e.Source!).GetSelfAndVisualAncestors()
                                                             .OfType<DataGridRow>()
                                                             .FirstOrDefault();
                 if (sourceRow == null) return;
@@ -129,7 +126,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
             if (draggedMod == null) return;
 
             // Get targetRow by the drop position
-            DataGridRow? targetRow = ((IControl)e.Source!).GetSelfAndVisualAncestors()
+            DataGridRow? targetRow = ((Control)e.Source!).GetSelfAndVisualAncestors()
                                                             .OfType<DataGridRow>()
                                                             .FirstOrDefault();
 
@@ -176,7 +173,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
                 }
             }
         };
-
+        
         string[]? result = await openFileDialog.ShowAsync(GetMainWindow() ?? throw new InvalidOperationException());
         if (result == null)
         {
