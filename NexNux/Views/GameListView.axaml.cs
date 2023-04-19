@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
@@ -23,10 +22,12 @@ public partial class GameListView : ReactiveWindow<GameListViewModel>
 
     private async Task DoShowGameConfigDialogAsync(InteractionContext<GameConfigViewModel, Game?> interactionContext)
     {
-        GameConfigView dialog = new GameConfigView();
-        dialog.DataContext = interactionContext.Input;
+        GameConfigView dialog = new GameConfigView
+        {
+            DataContext = interactionContext.Input
+        };
 
-        Game? result = await dialog.ShowDialog<Game>(this);
+        Game result = await dialog.ShowDialog<Game>(this);
         interactionContext.SetOutput(result);
     }
 

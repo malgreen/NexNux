@@ -197,7 +197,7 @@ public class HomeViewModel : ViewModelBase
 
             if (CurrentGame.Type != GameType.Generic && _pluginListViewModel != null)
             {
-                await Task.Run(() => CurrentPluginList.Synchronize());
+                await Task.Run(() => CurrentPluginList.RefreshFromDeployDirectory());
                 _pluginListViewModel.UpdateCurrentGame();
             }
 
@@ -245,7 +245,7 @@ public class HomeViewModel : ViewModelBase
             
             if (CurrentGame.Type != GameType.Generic)
             {
-                await Task.Run(() => CurrentPluginList.Synchronize());
+                await Task.Run(() => CurrentPluginList.RefreshFromDeployDirectory());
             }
             
             IsDeployed = false;

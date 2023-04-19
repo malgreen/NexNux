@@ -18,7 +18,7 @@ public class GameListViewModel : ViewModelBase
         string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         string gameListFile = Path.Combine(userFolder, "NexNux", "GameList.json");
         MainGameList = new GameList(gameListFile);
-        Games = new ObservableCollection<Game>(MainGameList.LoadList());
+        Games = new ObservableCollection<Game>(MainGameList.Games);
 
         ShowConfigDialog = new Interaction<GameConfigViewModel, Game?>();
         ShowRemoveDialog = new Interaction<Game, bool>();

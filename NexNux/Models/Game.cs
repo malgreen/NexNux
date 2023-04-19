@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Serialization;
-using NexNux.Models.Gamebryo;
 
 namespace NexNux.Models;
 
@@ -20,10 +19,6 @@ public class Game
 
         Settings = new GameSettings(SettingsDirectory ?? throw new InvalidOperationException());
         _modList = new ModList(SettingsDirectory ?? throw new InvalidOperationException());
-        if (Type is GameType.BGS or GameType.BGSPostSkyrim && AppDataDirectory is not null)
-        {
-            _gamebryoPluginList = new GamebryoPluginList(DeployDirectory, SettingsDirectory, AppDataDirectory, Type);
-        }
     }
 
     public string GameName { get; set; }
@@ -36,7 +31,6 @@ public class Game
     [JsonIgnore]
     public GameSettings Settings { get; private set; }
     private ModList _modList;
-    private GamebryoPluginList? _gamebryoPluginList;
 
     void ValidateInfo()
     {

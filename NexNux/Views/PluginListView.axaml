@@ -3,11 +3,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:material="using:Material.Icons.Avalonia"
-             xmlns:viewModels="clr-namespace:NexNux.ViewModels"
+             xmlns:vm="clr-namespace:NexNux.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NexNux.Views.PluginListView">
   <Design.DataContext>
-    <viewModels:PluginListViewModel/>
+    <vm:PluginListViewModel/>
   </Design.DataContext>
   
   <Grid Margin="10">
@@ -62,7 +62,7 @@
             <DataGridTextColumn Header="Name" Width="5*" Binding="{Binding PluginName}" IsReadOnly="True" />
             <DataGridTemplateColumn Header="Enabled" Width="1*" CanUserResize="False">
               <DataTemplate>
-                <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" HorizontalAlignment="Center" ClipToBounds="False" />
+                <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" HorizontalAlignment="Center"/>
               </DataTemplate>
             </DataGridTemplateColumn>
           </DataGrid.Columns>

@@ -83,7 +83,7 @@ public class PluginListViewModel : ViewModelBase
         Busy = true;
         VisiblePlugins.Move(oldIndex, newIndex);
         CurrentPluginList.Plugins = VisiblePlugins;
-        await Task.Run(() => CurrentPluginList.Synchronize());
+        await Task.Run(() => CurrentPluginList.RefreshFromDeployDirectory());
         // PluginListChanged?.Invoke(this, e);
         Busy = false;
     }
@@ -114,7 +114,7 @@ public class PluginListViewModel : ViewModelBase
         BusyMessage = "Saving...";
         Busy = true;
         CurrentPluginList.Plugins = VisiblePlugins;
-        await Task.Run(() => CurrentPluginList.Synchronize());
+        await Task.Run(() => CurrentPluginList.RefreshFromDeployDirectory());
         PluginListChanged?.Invoke(this, e);
         Busy = false;
     }

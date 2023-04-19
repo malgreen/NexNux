@@ -1,6 +1,4 @@
 using System;
-using Avalonia;
-using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using NexNux.ViewModels;
 using ReactiveUI;

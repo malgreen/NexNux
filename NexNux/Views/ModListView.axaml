@@ -7,8 +7,6 @@
 		    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="670"
 				x:Class="NexNux.Views.ModListView"
 				>
-
-
   <Design.DataContext>
     <vm:ModListViewModel/>
   </Design.DataContext>
@@ -72,7 +70,7 @@
               <!-- The checkbox is cut off/clipped on the left side. The current (hacky) workaround is to not set it to clip to bounds. -->
               <DataGridTemplateColumn Header="Enabled" Width="1*" CanUserResize="False">
                 <DataTemplate>
-                  <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center" ClipToBounds="False" />
+                  <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center" />
                 </DataTemplate>
               </DataGridTemplateColumn>
             </DataGrid.Columns>

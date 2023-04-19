@@ -1,6 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.Input;
 using System.Collections.Generic;
 using NexNux.Models;
@@ -16,7 +15,6 @@ using System.Linq;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Platform.Storage;
 
 namespace NexNux.Views;
 
@@ -175,7 +173,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
         };
         
         string[]? result = await openFileDialog.ShowAsync(GetMainWindow() ?? throw new InvalidOperationException());
-        if (result == null)
+        if (result == null || result.Length < 1)
         {
             interactionContext.SetOutput(null);
             return;
@@ -185,7 +183,7 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
         interactionContext.Input.UpdateModArchive(string.Join("", result));
         dialog.DataContext = interactionContext.Input;
 
-        Mod? mod = await dialog.ShowDialog<Mod>(GetMainWindow());
+        Mod mod = await dialog.ShowDialog<Mod>(GetMainWindow() ?? throw new InvalidOperationException());
         interactionContext.SetOutput(mod);
     }
     

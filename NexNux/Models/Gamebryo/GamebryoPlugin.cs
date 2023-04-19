@@ -49,14 +49,11 @@ public class GamebryoPlugin : INotifyPropertyChanged
 
     public override bool Equals(object? obj)
     {
-        if (obj is GamebryoPlugin plugin && obj != null)
+        if (obj is GamebryoPlugin plugin)
         {
             return PluginName == plugin.PluginName;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
     public override int GetHashCode()
     {

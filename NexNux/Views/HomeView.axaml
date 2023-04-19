@@ -3,12 +3,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:material="using:Material.Icons.Avalonia"
-        xmlns:views="clr-namespace:NexNux.Views"
         xmlns:vm="clr-namespace:NexNux.ViewModels;assembly=NexNux"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NexNux.Views.HomeView"
         Title="{Binding CurrentTitle}"
         >
+  <Design.DataContext>
+    <vm:HomeViewModel/>
+  </Design.DataContext>
   
   <Grid>
     <Grid.RowDefinitions>
