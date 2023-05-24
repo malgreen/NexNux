@@ -187,6 +187,7 @@ public class ModConfigViewModel : ViewModelBase
                 rootItem.SubItems = GetSubItems(rootPath);
                 //ExtractedFiles.Add(rootItem);
                 ExtractedFiles = rootItem.SubItems; //TBD - should it also show the root folder, or just files within it?
+                ValidateModInput();
             });
         }
         catch (Exception e)
@@ -215,6 +216,31 @@ public class ModConfigViewModel : ViewModelBase
             }
         }
         return subItems;
+    }
+    
+    /// <summary>
+    /// Searches through a given IModItem's SubItems, and each of their SubItems, for a IModItem by name.
+    /// Also checks the given IModItem if it matches the name.
+    /// </summary>
+    /// <param name="modItem">The item to search through</param>
+    /// <param name="itemName">The name of  the item to search for</param>
+    /// <returns>Whether an item by the given name exists in SubItems/given IModItem.</returns>
+    private bool ExistsInSubItems(IModItem modItem, string itemName)
+    {
+        if (modItem is null) return false;
+        if (modItem.ItemName == itemName || modItem.SubItems.Any(item => String.Equals(item.ItemName, itemName, StringComparison.CurrentCultureIgnoreCase)))
+        {
+            return true;
+        }
+        foreach (IModItem subItem in modItem.SubItems)
+        {
+            if (ExistsInSubItems(subItem, itemName))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async void SetSelectionToRoot()
@@ -273,6 +299,11 @@ public class ModConfigViewModel : ViewModelBase
             StatusMessage = "❌ Mod name cannot start with whitespace";
         else if (ModName.Length > 50)
             StatusMessage = "❌ Mod name is too long";
+        else if (CurrentGame.Type is not GameType.Generic && ExistsInSubItems(CurrentRoot, "data"))
+        {
+            StatusMessage = "⚠️ 'data' folder should be root";
+            CanInstall = true;
+        }
         else
         {
             StatusMessage = "✔️ Looks good";
