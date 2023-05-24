@@ -7,6 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NexNux.Views.HomeView"
         Title="{Binding CurrentTitle}"
+        Icon="/Assets/NexNux.ico"
         >
   <Design.DataContext>
     <vm:HomeViewModel/>

@@ -8,7 +8,8 @@
         MinWidth="500" MinHeight="400"
         Width="500" Height="400"
         x:Class="NexNux.Views.GameConfigView"
-        Title="GameConfigView">
+        Title="NexNux - Game Configurator"
+        Icon="/Assets/NexNux.ico">
   <Design.DataContext>
     <vm:GameConfigViewModel/>
   </Design.DataContext>

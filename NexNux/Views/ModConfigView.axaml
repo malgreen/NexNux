@@ -9,7 +9,8 @@
         Width="450" Height="450"
         MinWidth="450" MinHeight="450"
         x:Class="NexNux.Views.ModConfigView"
-        Title="ModConfigView">
+        Title="NexNux - Mod Configurator"
+        Icon="/Assets/NexNux.ico">
   <Design.DataContext>
     <vm:ModConfigViewModel/>
   </Design.DataContext>
