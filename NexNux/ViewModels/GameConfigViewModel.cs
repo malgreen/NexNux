@@ -173,8 +173,6 @@ public class GameConfigViewModel : ViewModelBase
             StatusMessage = "❌ Mods directory must be empty";
         else if (GameType != GameType.Generic && !Directory.Exists(AppDataPath))
             StatusMessage = "❌ AppData directory does not exist";
-        else if (GameType != GameType.Generic && !File.Exists(Path.Combine(AppDataPath, "plugins.txt")))
-            StatusMessage = "❌ AppData directory is not correct";
         else
         {
             StatusMessage = "✅ Looks good";

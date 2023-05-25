@@ -73,7 +73,13 @@ public class PluginListViewModel : ViewModelBase
             CurrentGame.AppDataDirectory, 
             CurrentGame.Type
             );
+        UpdatePlugins(CurrentPluginList);
+    }
+
+    public void UpdatePlugins(GamebryoPluginList pluginList)
+    {
         ObservableCollection<GamebryoPlugin> prevPlugins = VisiblePlugins;
+        CurrentPluginList = pluginList;
         VisiblePlugins = CurrentPluginList.Plugins;
         SetPluginListeners(VisiblePlugins, prevPlugins);
     }

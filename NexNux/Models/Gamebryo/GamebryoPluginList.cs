@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 
 namespace NexNux.Models.Gamebryo;
 
@@ -57,22 +58,12 @@ public class GamebryoPluginList
     /// <para>Load/create the Plugins collection.</para>
     /// <para>1. If a PluginList.json exists, that is deserialized into the Plugins collection - otherwise, the plugins.txt
     /// file is read and put into the collection.</para>
-    /// <para>2. Refreshes the Plugins collection according to plugins.txt</para>
-    /// <para>3. </para>
+    /// <para>2. Refreshes the Plugins collection according to Deploy directory</para>
+    /// <para>3. Refreshes the Plugins collection according to the 'plugins.txt' file</para>
     /// </summary>
     /// <exception cref="InvalidOperationException">Throws deserialization error</exception>
     public void Load()
     {
-        if (!File.Exists(_pluginsTxtPath))
-        {
-            File.Create(_pluginsTxtPath);
-        }
-
-        if (!File.Exists(_loadorderTxtPath))
-        {
-            File.Create(_loadorderTxtPath);
-        }
-
         try
         {
             string jsonString = File.ReadAllText(_pluginListFileName);
@@ -88,8 +79,8 @@ public class GamebryoPluginList
             File.Delete(_pluginListFileName);
         }
 
-        RefreshFromTxt();
         RefreshFromDeployDirectory();
+        RefreshFromTxt();
     }
 
     /// <summary>
@@ -140,7 +131,7 @@ public class GamebryoPluginList
         foreach(GamebryoPlugin plugin in Plugins)
         {
             if (!plugin.IsEnabled) continue;
-            string pluginName = useAsteriskPrefix ? string.Join("*", plugin.PluginName) : plugin.PluginName;
+            string pluginName = useAsteriskPrefix ? string.Concat("*", plugin.PluginName) : plugin.PluginName;
             streamWriter.WriteLine(pluginName);
         }
     }
@@ -148,29 +139,43 @@ public class GamebryoPluginList
     private List<GamebryoPlugin> GetPluginsFromFile(string filePath)
     {
         List<GamebryoPlugin> readPlugins = new List<GamebryoPlugin>();
-        foreach (string pluginLine in File.ReadLines(filePath))
+        using (FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate))
         {
-            if (!_pluginTypeDictionary.TryGetValue(Path.GetExtension(pluginLine.ToLower()), out var pluginType)) continue;
-
-            string pluginName = _gameType == GameType.BGS ? pluginLine : pluginLine.Substring(1);
-
-            GamebryoPlugin plugin = new GamebryoPlugin(pluginName, pluginType, readPlugins.Count, true);
-            readPlugins.Add(plugin);
+            using (StreamReader streamReader = new StreamReader(fileStream))
+            {
+                while (!streamReader.EndOfStream)
+                {
+                    string pluginLine = streamReader.ReadLine() ?? string.Empty;
+                    string pluginName = pluginLine.StartsWith("*") ? pluginLine.Substring(1) : pluginLine;
+                    
+                    // A bit risky, but should work most of the time - change to bool parameter if necessary
+                    if (!_pluginTypeDictionary.TryGetValue(Path.GetExtension(pluginLine.ToLower()), out var pluginType)) continue;
+                    
+                    GamebryoPlugin plugin = new GamebryoPlugin(pluginName, pluginType, readPlugins.Count, true);
+                    readPlugins.Add(plugin);
+                }
+            }
         }
+        
         return readPlugins;
     }
 
     private List<GamebryoPlugin> GetPluginsFromDirectory(string dirPath)
     {
         List<GamebryoPlugin> readPlugins = new List<GamebryoPlugin>();
-        foreach (string file in Directory.GetFiles(dirPath))
+        
+        DirectoryInfo directoryInfo = new DirectoryInfo(dirPath);
+        List<FileInfo> dirFiles = directoryInfo.GetFiles().OrderByDescending(f => f.LastWriteTime).ToList();
+        foreach (FileInfo file in dirFiles)
         {
-            if (!_pluginTypeDictionary.TryGetValue(Path.GetExtension(file.ToLower()), out var pluginType)) continue;
-            GamebryoPlugin plugin = new GamebryoPlugin(Path.GetFileName(file), pluginType, readPlugins.Count, true);
+            if (!_pluginTypeDictionary.TryGetValue(file.Extension.ToLower(), out var pluginType)) continue;
+            GamebryoPlugin plugin = new GamebryoPlugin(file.Name, pluginType, readPlugins.Count, true);
             readPlugins.Add(plugin);
         }
+        
         return readPlugins;
     }
+    
 
     private void SetTimestampsAndIndices()
     {
@@ -194,10 +199,12 @@ public class GamebryoPluginList
 
     private void SetPluginTimeStamps()
     {
+        int timeOffset = 0;
         foreach (GamebryoPlugin plugin in Plugins)
         {
             string pluginPath = Path.Combine(_deployDirPath, plugin.PluginName);
-            File.SetLastWriteTime(pluginPath, DateTime.Now);
+            File.SetLastWriteTime(pluginPath, new DateTime(2000 + timeOffset, 1, 1));
+            timeOffset++;
         }
     }
 }

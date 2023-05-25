@@ -243,6 +243,22 @@ public class ModConfigViewModel : ViewModelBase
         return false;
     }
 
+    private bool ExistsInRoot(string itemName)
+    {
+        if (CurrentRoot is null) return false;
+        if (CurrentRoot.SubItems.Any(item =>
+                String.Equals(item.ItemName, itemName, StringComparison.CurrentCultureIgnoreCase))) return true;
+        return false;
+    }
+
+    private bool ExistsInRootByFileExtension(string fileExtension)
+    {
+        if (CurrentRoot is null) return false;
+        if (CurrentRoot.SubItems.Any(item => String.Equals(Path.GetExtension(item.ItemName), fileExtension,
+                StringComparison.CurrentCultureIgnoreCase))) return true;
+        return false;
+    }
+
     private async void SetSelectionToRoot()
     {
         if (SelectedItem is ModFolderItem)
@@ -288,6 +304,17 @@ public class ModConfigViewModel : ViewModelBase
         return Task.FromResult<Mod?>(null); //There is null-checking in the modlistviewmodel
     }
 
+    private bool IsGamebryoContentAtRoot()
+    {
+        if (ExistsInSubItems(CurrentRoot, "data")) return false;
+        if (ExistsInRoot("textures") || ExistsInRoot("meshes") || ExistsInRoot("sound") || 
+            ExistsInRoot("menus") || ExistsInRoot("music") || ExistsInRoot("shaders")) return true;
+        if (ExistsInRootByFileExtension(".esm") || ExistsInRootByFileExtension(".esl") ||
+            ExistsInRootByFileExtension(".esp") || ExistsInRootByFileExtension(".ba2") ||
+            ExistsInRootByFileExtension(".bsa")) return true;
+        return false;
+    }
+
     private void ValidateModInput()
     {
         CanInstall = false;
@@ -299,9 +326,9 @@ public class ModConfigViewModel : ViewModelBase
             StatusMessage = "❌ Mod name cannot start with whitespace";
         else if (ModName.Length > 50)
             StatusMessage = "❌ Mod name is too long";
-        else if (CurrentGame.Type is not GameType.Generic && ExistsInSubItems(CurrentRoot, "data"))
+        else if (CurrentGame.Type is not GameType.Generic && !IsGamebryoContentAtRoot())
         {
-            StatusMessage = "⚠️ 'data' folder should be root";
+            StatusMessage = "⚠️ No game content at root";
             CanInstall = true;
         }
         else
