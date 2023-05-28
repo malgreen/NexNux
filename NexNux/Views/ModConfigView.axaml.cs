@@ -1,6 +1,4 @@
 using System;
-using Avalonia;
-using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using NexNux.ViewModels;
 using ReactiveUI;
@@ -14,13 +12,6 @@ public partial class ModConfigView : ReactiveWindow<ModConfigViewModel>
         InitializeComponent();
         this.WhenActivated(d => d(ViewModel!.InstallModCommand.Subscribe(Close)));
         this.WhenActivated(d => d(ViewModel!.CancelCommand.Subscribe(Close)));
-#if DEBUG
-        this.AttachDevTools();
-#endif
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

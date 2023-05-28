@@ -18,7 +18,7 @@ public class GameListViewModel : ViewModelBase
         string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         string gameListFile = Path.Combine(userFolder, "NexNux", "GameList.json");
         MainGameList = new GameList(gameListFile);
-        Games = new ObservableCollection<Game>(MainGameList.LoadList());
+        Games = new ObservableCollection<Game>(MainGameList.Games);
 
         ShowConfigDialog = new Interaction<GameConfigViewModel, Game?>();
         ShowRemoveDialog = new Interaction<Game, bool>();
@@ -64,7 +64,7 @@ public class GameListViewModel : ViewModelBase
             Game? result = await ShowConfigDialog.Handle(config);
             if (result == null) return;
 
-            MainGameList.ModifyGame(result.GameName, result.DeployDirectory, result.ModsDirectory);
+            MainGameList.ModifyGame(result.GameName, result.Type, result.DeployDirectory, result.ModsDirectory, result.AppDataDirectory);
             Games = new ObservableCollection<Game>(MainGameList.Games); // There might very well be a better way to do this
         }
         catch (Exception ex)

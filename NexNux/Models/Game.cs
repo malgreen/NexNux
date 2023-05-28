@@ -7,12 +7,14 @@ namespace NexNux.Models;
 
 public class Game
 {
-    public Game(string gameName, string deployDirectory, string modsDirectory)
+    public Game(string gameName, GameType type, string deployDirectory, string modsDirectory, string? appDataDirectory)
     {
         GameName = gameName;
+        Type = type;
         DeployDirectory = deployDirectory;
         ModsDirectory = modsDirectory;
         SettingsDirectory = Path.Combine(ModsDirectory, ".NexNux");
+        AppDataDirectory = appDataDirectory;
         ValidateInfo();
 
         Settings = new GameSettings(SettingsDirectory ?? throw new InvalidOperationException());
@@ -20,9 +22,11 @@ public class Game
     }
 
     public string GameName { get; set; }
+    public GameType Type { get; set; }
     public string DeployDirectory { get; set; }
     public string ModsDirectory { get; set; }
     public string SettingsDirectory { get; set; }
+    public string? AppDataDirectory { get; set; }
 
     [JsonIgnore]
     public GameSettings Settings { get; private set; }

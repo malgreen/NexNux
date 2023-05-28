@@ -3,11 +3,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:material="using:Material.Icons.Avalonia"
-        xmlns:views="clr-namespace:NexNux.Views"
         xmlns:vm="clr-namespace:NexNux.ViewModels;assembly=NexNux"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NexNux.Views.HomeView"
-        Title="{Binding CurrentTitle}">
+        Title="{Binding CurrentTitle}"
+        Icon="/Assets/NexNux.ico"
+        >
+  <Design.DataContext>
+    <vm:HomeViewModel/>
+  </Design.DataContext>
+  
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="50"></RowDefinition>
@@ -19,8 +24,9 @@
         <NativeMenuItem Header="_File"></NativeMenuItem>
       </NativeMenu>
     </NativeMenu.Menu>
-
-    <TabControl Name="HomeTabs" 
+    
+    <TabControl Name="HomeTabs"
+                Padding="0"
                 Grid.Row="1" 
                 TabStripPlacement="Left"
                 Items="{Binding TabItems}">
@@ -31,10 +37,13 @@
           <Setter Property="Background" Value="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"/>
         </Style>
         <Style Selector="TabControl Border">
-          <Setter Property="Margin" Value="0,0,4,0"></Setter>
+          <Setter Property="Margin" Value="0,0,0,0"/>
         </Style>
         <Style Selector="TabItem:selected /template/ Border#PART_SelectedPipe">
           <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="TabItem">
+          <Setter Property="Padding" Value="0,0,10,0"/>
         </Style>
         <Style Selector="TabItem > Border[Tag=PART_TabItemBorder]">
           <Setter Property="CornerRadius" Value="4"/>
@@ -69,7 +78,8 @@
     </TabControl>
     
     <Panel Grid.Row="0"
-           Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+           Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"
+           >
       
       <Border HorizontalAlignment="Left" VerticalAlignment="Center" Padding="10">
         <TextBlock Text="{Binding CurrentGame}" FontWeight="Black" FontSize="22" />
@@ -77,7 +87,7 @@
       
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
         
-        <Button Command="{Binding DeployModsCommand}" Classes="accent" IsEnabled="{Binding !IsDeploying}" Width="100">
+        <Button Command="{Binding DeployModsCommand}" IsEnabled="{Binding !IsDeploying}" Width="100">
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <material:MaterialIcon Kind="ContentSave" Margin="0,0,8,0"/>
             <TextBlock Text="Deploy" FontSize="14" FontWeight="Bold"/>

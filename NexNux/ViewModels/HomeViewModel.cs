@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Material.Icons;
 using NexNux.Models;
+using NexNux.Models.Gamebryo;
 using NexNux.Utilities;
 using NexNux.Utilities.ModDeployment;
 using NexNux.Views;
@@ -58,6 +59,13 @@ public class HomeViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _currentModList, value);
     }
 
+    private GamebryoPluginList _currentPluginList = null!;
+    public GamebryoPluginList CurrentPluginList
+    {
+        get => _currentPluginList;
+        set => this.RaiseAndSetIfChanged(ref _currentPluginList, value);
+    }
+
     private bool _isDeployed;
     public bool IsDeployed
     {
@@ -99,6 +107,10 @@ public class HomeViewModel : ViewModelBase
         get => _deploymentTotal;
         set => this.RaiseAndSetIfChanged(ref _deploymentTotal, value);
     }
+
+    private ModListViewModel? _modListViewModel;
+    private PluginListViewModel? _pluginListViewModel;
+    
     public ReactiveCommand<Unit, Unit> DeployModsCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearModsCommand { get; }
     public Interaction<string, bool> ShowErrorDialog { get; }
@@ -115,20 +127,24 @@ public class HomeViewModel : ViewModelBase
     public void InitializeTabs()
     {
         InitializeModsTab();
+        if (CurrentGame?.Type != GameType.Generic)
+        {
+            InitializePluginsTab();
+        }
         InitializeSettingsTab();
     }
 
     private void InitializeModsTab()
     {
-        ModListViewModel modListViewModel = new ModListViewModel()
+        _modListViewModel = new ModListViewModel()
         {
             CurrentGame = CurrentGame
         };
-        modListViewModel.ModListChanged += ModListViewModel_OnModListChanged;
-        CurrentModList = modListViewModel.CurrentModList;
+        _modListViewModel.ModListChanged += ModListViewModel_OnModListChanged;
+        CurrentModList = _modListViewModel.CurrentModList;
         ModListView modListView = new ModListView
         {
-            DataContext = modListViewModel
+            DataContext = _modListViewModel
         };
 
         NexNuxTabItem modsTabItem = new NexNuxTabItem("Mods", MaterialIconKind.Plugin, modListView);
@@ -144,6 +160,23 @@ public class HomeViewModel : ViewModelBase
         }
     }
 
+    private void InitializePluginsTab()
+    {
+        if (CurrentGame == null || CurrentGame.AppDataDirectory == null) return;
+        _pluginListViewModel = new PluginListViewModel()
+        {
+            CurrentGame = CurrentGame
+        };
+        CurrentPluginList = _pluginListViewModel.CurrentPluginList;
+        PluginListView pluginListView = new PluginListView()
+        {
+            DataContext = _pluginListViewModel
+        };
+        
+        NexNuxTabItem pluginsTabItem = new NexNuxTabItem("Plugins", MaterialIconKind.FormatListBulleted, pluginListView);
+        TabItems.Add(pluginsTabItem);
+    }
+
     private void InitializeSettingsTab()
     {
         NexNuxTabItem settingsTabItem = new NexNuxTabItem("Settings", MaterialIconKind.Settings, new UserControl());
@@ -157,9 +190,17 @@ public class HomeViewModel : ViewModelBase
         {
             IsDeploying = true;
             DeploymentTotal = GetFileAmount(CurrentModList.GetActiveMods());
+            
             IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
             modDeployer.FileDeployed += ModDeployer_FileDeployed;
             await Task.Run(() => modDeployer.Deploy(CurrentModList.GetActiveMods()));
+
+            if (CurrentGame.Type != GameType.Generic && _pluginListViewModel != null)
+            {
+                await Task.Run(() => CurrentPluginList.RefreshFromDeployDirectory());
+                _pluginListViewModel.UpdatePlugins(CurrentPluginList);
+            }
+
             IsDeploying = false;
             IsDeployed = true;
             DeploymentProgress = 0;
@@ -198,8 +239,15 @@ public class HomeViewModel : ViewModelBase
         try
         {
             IsDeploying = true;
+            
             IModDeployer modDeployer = new SymLinkDeployer(CurrentGame);
             await Task.Run(() => modDeployer.Clear());
+            
+            if (CurrentGame.Type != GameType.Generic)
+            {
+                await Task.Run(() => CurrentPluginList.RefreshFromDeployDirectory());
+            }
+            
             IsDeployed = false;
             IsDeploying = false;
         }
@@ -231,6 +279,11 @@ public class HomeViewModel : ViewModelBase
         if (CurrentGame == null) return;
         CurrentGame.Settings.RecentlyDeployed = IsDeployed;
         CurrentGame.Settings.Save();
+        if (_pluginListViewModel != null)
+        {
+            _pluginListViewModel.BusyMessage = "Please deploy before managing plugins.";
+            _pluginListViewModel.Busy = !IsDeployed;
+        }
     }
 }
 

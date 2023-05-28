@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using Avalonia.ReactiveUI;
 using MessageBox.Avalonia;
@@ -16,16 +15,8 @@ public partial class HomeView : ReactiveWindow<HomeViewModel>
     {
         InitializeComponent();
         this.WhenActivated(d => d(ViewModel!.ShowErrorDialog.RegisterHandler(DoShowErrorDialogAsync)));
-#if DEBUG
-        this.AttachDevTools();
-#endif
     }
-    
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }    
-    
+
     private async Task DoShowErrorDialogAsync(InteractionContext<string, bool> interactionContext)
     {
         var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", interactionContext.Input, ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Warning);

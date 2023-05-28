@@ -7,24 +7,21 @@
 		    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="670"
 				x:Class="NexNux.Views.ModListView"
 				>
-
-
   <Design.DataContext>
     <vm:ModListViewModel/>
   </Design.DataContext>
 
   <DockPanel>
-    <Grid>
+    <Grid Margin="10">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="1*"/>
-        <ColumnDefinition Width="65" />
+        <ColumnDefinition Width="62" />
       </Grid.ColumnDefinitions>
 
-      <Border Grid.Column="0" 
-              Margin="0,10,10,10" 
+      <Border Grid.Column="0"  
               CornerRadius="3" 
-              BorderBrush="{DynamicResource SystemChromeGrayColor}" 
-              BorderThickness="1">
+              BorderBrush="{DynamicResource SystemControlPageBackgroundChromeLowBrush}" 
+              BorderThickness="2">
         <Canvas Name="GridModsCanvas" Width="{Binding $parent[Border].Bounds.Width}" Height="{Binding $parent[Border].Bounds.Height}">
           <DataGrid   Name="GridMods"
 								Background="Transparent"
@@ -35,21 +32,31 @@
 								CanUserReorderColumns="False"
 								SelectedItem="{Binding SelectedMod, Mode=TwoWay}"
 								SelectionMode="Single"
-								AlternatingRowBackground="{DynamicResource SystemRevealListLowColor}"
-								Width="{Binding $parent[Border].Bounds.Width}"
+                Width="{Binding $parent[Border].Bounds.Width}"
 								Height="{Binding $parent[Border].Bounds.Height}"
 								>
             <DataGrid.Styles>
+              <Style Selector="DataGrid /template/ Rectangle#PART_ColumnHeadersAndRowsSeparator">
+                <Setter Property="MinHeight" Value="2"/>
+                <Setter Property="Stroke" Value="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"/>
+                <Setter Property="StrokeThickness" Value="2"/>
+              </Style>
               <Style Selector="DataGridColumnHeader">
                 <Setter Property="IsHitTestVisible" Value="False" />
                 <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Padding" Value="2"/>
                 <Setter Property="DragDrop.AllowDrop" Value="False" />
               </Style>
               <Style Selector="DataGridColumnHeader TextBlock">
-                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontSize" Value="12"/>
                 <Setter Property="HorizontalAlignment" Value="Center"/>
                 <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="ClipToBounds" Value="False"/>
+              </Style>
+              <Style Selector="DataGridColumnHeader /template/ Rectangle#VerticalSeparator">
+                <Setter Property="MinWidth" Value="2"/>
+                <Setter Property="Margin" Value="0,-1,0,0"/>
+                <Setter Property="Stroke" Value="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"/>
+                <Setter Property="StrokeThickness" Value="2"/>
               </Style>
               <Style Selector="DataGridCell:current /template/ Grid#FocusVisual">
                 <Setter Property="IsVisible" Value="False"/>
@@ -63,7 +70,7 @@
               <!-- The checkbox is cut off/clipped on the left side. The current (hacky) workaround is to not set it to clip to bounds. -->
               <DataGridTemplateColumn Header="Enabled" Width="1*" CanUserResize="False">
                 <DataTemplate>
-                  <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center" ClipToBounds="False" />
+                  <CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Center" />
                 </DataTemplate>
               </DataGridTemplateColumn>
             </DataGrid.Columns>
@@ -72,7 +79,7 @@
       </Border>
       
       <Border CornerRadius="3" Grid.Column="1">
-        <StackPanel Spacing="10" Margin="0,10">
+        <StackPanel Spacing="10" Margin="10,0,0,0">
           
           <Button Command="{Binding InstallModCommand}" 
                   Background="{DynamicResource NotificationCardSuccessBackgroundBrush}"

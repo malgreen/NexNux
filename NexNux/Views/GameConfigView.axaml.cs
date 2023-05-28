@@ -2,10 +2,8 @@ using System;
 using System.Diagnostics;
 using System.Reactive;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using NexNux.ViewModels;
 using ReactiveUI;
@@ -24,14 +22,7 @@ public partial class GameConfigView : ReactiveWindow<GameConfigViewModel>
         this.WhenActivated(d => d(ViewModel!.ShowErrorDialog.RegisterHandler(DoShowErrorDialogAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowDeployFolderDialog.RegisterHandler(DoShowDeployFolderDialog)));
         this.WhenActivated(d => d(ViewModel!.ShowModsFolderDialog.RegisterHandler(DoShowModsFolderDialog)));
-#if DEBUG
-        this.AttachDevTools();
-#endif
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(d => d(ViewModel!.ShowAppDataFolderDialog.RegisterHandler(DoShowAppDataFolderDialog)));
     }
 
     private async Task DoShowErrorDialogAsync(InteractionContext<string, string> interactionContext)
@@ -52,6 +43,13 @@ public partial class GameConfigView : ReactiveWindow<GameConfigViewModel>
     {
         OpenFolderDialog openFolderDialog = new OpenFolderDialog();
         openFolderDialog.Title = "Choose mods folder";
+        interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
+    }
+    
+    private async Task DoShowAppDataFolderDialog(InteractionContext<Unit, string> interactionContext)
+    {
+        OpenFolderDialog openFolderDialog = new OpenFolderDialog();
+        openFolderDialog.Title = "Choose the AppData folder for this game";
         interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
     }
 

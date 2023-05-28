@@ -17,27 +17,63 @@ public class GameConfigViewModel : ViewModelBase
         SaveGameCommand = ReactiveCommand.CreateFromTask(SaveGame);
         ChooseDeployPathCommand = ReactiveCommand.CreateFromTask(ChooseDeployPath);
         ChooseModsPathCommand = ReactiveCommand.CreateFromTask(ChooseModsPath);
+        ChooseAppDataPathCommand = ReactiveCommand.CreateFromTask(ChooseAppDataPath);
         ShowErrorDialog = new Interaction<string, string>();
         ShowDeployFolderDialog = new Interaction<Unit, string>();
         ShowModsFolderDialog = new Interaction<Unit, string>();
+        ShowAppDataFolderDialog = new Interaction<Unit, string>();
         
         CanAddGame = false;
         StatusMessage = string.Empty;
         GameName = string.Empty;
+        GameType = GameType.Generic;
+        TypeIndex = 0;
         ModsPath = string.Empty;
         DeployPath = string.Empty;
 
+        this.WhenAnyValue(x => x.TypeIndex).Subscribe(_ => SetGameType());
         this.WhenAnyValue(x => x.GameName).Subscribe(_ => ValidateGameInput());
         this.WhenAnyValue(x => x.DeployPath).Subscribe(_ => ValidateGameInput());
         this.WhenAnyValue(x => x.ModsPath).Subscribe(_ => ValidateGameInput());
-
-
+        this.WhenAnyValue(x => x.AppDataPath).Subscribe(_ => ValidateGameInput());
+        this.WhenAnyValue(x => x.GameType).Subscribe(_ => ValidateGameInput());
     }
+
+    private void SetGameType()
+    {
+        switch (TypeIndex)
+        {
+            case 0:
+                GameType = GameType.Generic;
+                break;
+            case 1:
+                GameType = GameType.BGS;
+                break;
+            case 2:
+                GameType = GameType.BGSPostSkyrim;
+                break;
+        }
+    }
+
     private string _gameName = null!;
     public string GameName
     {
         get => _gameName;
         set => this.RaiseAndSetIfChanged(ref _gameName, value);
+    }
+
+    private GameType _gameType;
+    public GameType GameType
+    {
+        get => _gameType;
+        set => this.RaiseAndSetIfChanged(ref _gameType, value);
+    }
+
+    private int _typeIndex;
+    public int TypeIndex
+    {
+        get => _typeIndex;
+        set => this.RaiseAndSetIfChanged(ref _typeIndex, value);
     }
     
     private string _deployPath = null!;
@@ -52,6 +88,13 @@ public class GameConfigViewModel : ViewModelBase
     {
         get => _modsPath;
         set => this.RaiseAndSetIfChanged(ref _modsPath, value);
+    }
+
+    private string _appDataPath = null!;
+    public string AppDataPath
+    {
+        get => _appDataPath;
+        set => this.RaiseAndSetIfChanged(ref _appDataPath, value);
     }
 
     private bool _canAddGame;
@@ -71,15 +114,17 @@ public class GameConfigViewModel : ViewModelBase
     public ReactiveCommand<Unit, Game?> SaveGameCommand { get; }
     public ReactiveCommand<Unit, Unit> ChooseDeployPathCommand { get; }
     public ReactiveCommand<Unit, Unit> ChooseModsPathCommand { get; }
+    public ReactiveCommand<Unit, Unit> ChooseAppDataPathCommand { get; }
     public Interaction<string, string> ShowErrorDialog { get; } 
     public Interaction<Unit, string> ShowDeployFolderDialog { get; }
     public Interaction<Unit, string> ShowModsFolderDialog { get; }
+    public Interaction<Unit, string> ShowAppDataFolderDialog { get; }
 
     public async Task<Game?> SaveGame()
     {
         try
         {
-            Game game = new Game(GameName, DeployPath, ModsPath);
+            Game game = new Game(GameName, GameType, DeployPath, ModsPath, AppDataPath);
             return game;
         }
         catch (Exception e)
@@ -98,6 +143,11 @@ public class GameConfigViewModel : ViewModelBase
     async Task ChooseModsPath()
     {
         ModsPath = await ShowModsFolderDialog.Handle(Unit.Default);
+    }
+
+    async Task ChooseAppDataPath()
+    {
+        AppDataPath = await ShowAppDataFolderDialog.Handle(Unit.Default);
     }
 
     void ValidateGameInput()
@@ -121,6 +171,8 @@ public class GameConfigViewModel : ViewModelBase
             StatusMessage = "❌ Directories must reside on the same drive";
         else if (Directory.EnumerateFileSystemEntries(ModsPath).Any()) // This makes it so the editing a game no longer works
             StatusMessage = "❌ Mods directory must be empty";
+        else if (GameType != GameType.Generic && !Directory.Exists(AppDataPath))
+            StatusMessage = "❌ AppData directory does not exist";
         else
         {
             StatusMessage = "✅ Looks good";
