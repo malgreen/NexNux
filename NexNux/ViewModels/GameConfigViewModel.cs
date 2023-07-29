@@ -18,7 +18,7 @@ public class GameConfigViewModel : ViewModelBase
         ChooseDeployPathCommand = ReactiveCommand.CreateFromTask(ChooseDeployPath);
         ChooseModsPathCommand = ReactiveCommand.CreateFromTask(ChooseModsPath);
         ChooseAppDataPathCommand = ReactiveCommand.CreateFromTask(ChooseAppDataPath);
-        ShowErrorDialog = new Interaction<string, string>();
+        ShowErrorDialog = new Interaction<string, bool>();
         ShowDeployFolderDialog = new Interaction<Unit, string>();
         ShowModsFolderDialog = new Interaction<Unit, string>();
         ShowAppDataFolderDialog = new Interaction<Unit, string>();
@@ -115,7 +115,7 @@ public class GameConfigViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ChooseDeployPathCommand { get; }
     public ReactiveCommand<Unit, Unit> ChooseModsPathCommand { get; }
     public ReactiveCommand<Unit, Unit> ChooseAppDataPathCommand { get; }
-    public Interaction<string, string> ShowErrorDialog { get; } 
+    public Interaction<string, bool> ShowErrorDialog { get; } 
     public Interaction<Unit, string> ShowDeployFolderDialog { get; }
     public Interaction<Unit, string> ShowModsFolderDialog { get; }
     public Interaction<Unit, string> ShowAppDataFolderDialog { get; }

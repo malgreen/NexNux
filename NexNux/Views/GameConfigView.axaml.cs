@@ -7,8 +7,10 @@ using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using NexNux.ViewModels;
 using ReactiveUI;
-using MessageBox.Avalonia;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
+using Avalonia.Platform.Storage;
+using System.Linq;
 
 namespace NexNux.Views;
 
@@ -25,32 +27,68 @@ public partial class GameConfigView : ReactiveWindow<GameConfigViewModel>
         this.WhenActivated(d => d(ViewModel!.ShowAppDataFolderDialog.RegisterHandler(DoShowAppDataFolderDialog)));
     }
 
-    private async Task DoShowErrorDialogAsync(InteractionContext<string, string> interactionContext)
+    private async Task DoShowErrorDialogAsync(InteractionContext<string, bool> interactionContext)
     {
-        var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", interactionContext.Input, ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Warning);
-        await messageBox.ShowDialog(this);
-        interactionContext.SetOutput(""); // This has to be here, otherwise ReactiveUI is not happy, so maybe this should not be an interaction at all?
+        var messageBox = MessageBoxManager.GetMessageBoxStandard("Error!", interactionContext.Input, ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Warning);
+        await messageBox.ShowAsPopupAsync(this);
+        interactionContext.SetOutput(true);
     }
 
     private async Task DoShowDeployFolderDialog(InteractionContext<Unit, string> interactionContext)
     {
-        OpenFolderDialog openFolderDialog = new OpenFolderDialog();
-        openFolderDialog.Title = "Choose deploy folder";
-        interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Choose Deploy Folder",
+            AllowMultiple = false,
+            SuggestedStartLocation = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Desktop)
+        });
+
+        if (folders.Count >= 1)
+        {
+            interactionContext.SetOutput(folders[0].TryGetLocalPath() ?? string.Empty);
+        }
+        else
+        {
+            interactionContext.SetOutput(string.Empty);
+        }
     }
 
     private async Task DoShowModsFolderDialog(InteractionContext<Unit, string> interactionContext)
     {
-        OpenFolderDialog openFolderDialog = new OpenFolderDialog();
-        openFolderDialog.Title = "Choose mods folder";
-        interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Choose Mods Folder",
+            AllowMultiple = false,
+            SuggestedStartLocation = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Desktop)
+        });
+
+        if (folders.Count >= 1)
+        {
+            interactionContext.SetOutput(folders[0].TryGetLocalPath() ?? string.Empty);
+        }
+        else
+        {
+            interactionContext.SetOutput(string.Empty);
+        }
     }
     
     private async Task DoShowAppDataFolderDialog(InteractionContext<Unit, string> interactionContext)
     {
-        OpenFolderDialog openFolderDialog = new OpenFolderDialog();
-        openFolderDialog.Title = "Choose the AppData folder for this game";
-        interactionContext.SetOutput(await openFolderDialog.ShowAsync(this) ?? string.Empty);
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Choose AppData Folder",
+            AllowMultiple = false,
+            SuggestedStartLocation = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Desktop)
+        });
+
+        if (folders.Count >= 1)
+        {
+            interactionContext.SetOutput(folders[0].TryGetLocalPath() ?? string.Empty);
+        }
+        else
+        {
+            interactionContext.SetOutput(string.Empty);
+        }
     }
 
     private void Cancel_OnClick(object? sender, RoutedEventArgs e)

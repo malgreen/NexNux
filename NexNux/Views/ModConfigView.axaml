@@ -40,7 +40,7 @@
 
       <Border Grid.Column="1" Grid.Row="1" BorderBrush="Gray" BorderThickness="1" Margin="10" CornerRadius="3">
         <Panel>
-          <TreeView Name="ItemTreeView" Items="{Binding ExtractedFiles}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" IsVisible="{Binding !IsExtracting}" HorizontalAlignment="Stretch">
+          <TreeView Name="ItemTreeView" ItemsSource="{Binding ExtractedFiles}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" IsVisible="{Binding !IsExtracting}" HorizontalAlignment="Stretch">
             <TreeView.ItemTemplate>
               <TreeDataTemplate ItemsSource="{Binding SubItems}">
                 <TextBlock Text="{Binding}">

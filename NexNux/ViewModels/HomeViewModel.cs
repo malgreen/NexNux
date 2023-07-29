@@ -21,6 +21,7 @@ public class HomeViewModel : ViewModelBase
 {
     public HomeViewModel()
     {
+        DeploymentProgress = 0;
         DeploymentTotal = 1;
         
         ShowErrorDialog = new Interaction<string, bool>();
@@ -218,7 +219,7 @@ public class HomeViewModel : ViewModelBase
         DeploymentProgress = e.Progress;
     }
     
-    private double GetFileAmount(List<Mod?> mods)
+    private static double GetFileAmount(List<Mod?> mods)
     {
         int amount = 0;
         foreach (Mod? mod in mods)

@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
-using MessageBox.Avalonia;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using NexNux.Models;
 using NexNux.ViewModels;
 using ReactiveUI;
@@ -33,13 +33,13 @@ public partial class GameListView : ReactiveWindow<GameListViewModel>
 
     private async Task DoShowGameRemoveDialogAsync(InteractionContext<Game, bool> interactionContext)
     {
-        var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
+        var messageBox = MessageBoxManager.GetMessageBoxStandard(
             "Are you sure?",
             $"This will also delete ALL mods and settings previously configured for {interactionContext.Input} within NexNux",
             ButtonEnum.OkCancel,
-            MessageBox.Avalonia.Enums.Icon.Warning
+            MsBox.Avalonia.Enums.Icon.Warning
         );
-        var result = await messageBox.Show(this);
+        var result = await messageBox.ShowAsPopupAsync(this);
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 

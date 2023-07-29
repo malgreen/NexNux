@@ -12,6 +12,8 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using NexNux.Utilities;
+using Avalonia.Controls;
+using System.Reactive.Linq;
 
 namespace NexNux.ViewModels;
 
@@ -24,6 +26,8 @@ public class ModConfigViewModel : ViewModelBase
         SetSelectionToClipboardCommand = ReactiveCommand.CreateFromTask(SetSelectionToClipboard);
         InstallModCommand = ReactiveCommand.CreateFromTask(InstallMod);
         CancelCommand = ReactiveCommand.CreateFromTask(Cancel);
+        ShowErrorDialog = new Interaction<string, bool>();
+        SetSelectionToClipboardAsync = new Interaction<string, bool>();
 
         this.WhenAnyValue(x => x.ModName).Subscribe(_ => ValidateModInput());
     }
@@ -111,6 +115,8 @@ public class ModConfigViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SetSelectionToClipboardCommand { get; set; }
     public ReactiveCommand<Unit, Mod?> InstallModCommand { get; }
     public ReactiveCommand<Unit, Mod?> CancelCommand { get; }
+    public Interaction<string, bool> ShowErrorDialog { get; }
+    public Interaction<string, bool> SetSelectionToClipboardAsync { get; }
 
 
     public async void UpdateModArchive(string archivePath)
@@ -160,15 +166,17 @@ public class ModConfigViewModel : ViewModelBase
                         }
                         catch (Exception e)
                         {
+                            ShowErrorDialog.Handle(e.Message);
                             Debug.WriteLine(e);
                         }
                     }
                 });
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Debug.WriteLine(ex.StackTrace);
+            await ShowErrorDialog.Handle(e.Message);
+            Debug.WriteLine(e.StackTrace);
         }
 
         if (ExtractionProgress != 100) ExtractionProgress = 100;
@@ -192,6 +200,7 @@ public class ModConfigViewModel : ViewModelBase
         }
         catch (Exception e)
         {
+            await ShowErrorDialog.Handle(e.Message);
             Debug.WriteLine(e);
         }
     }
@@ -272,11 +281,12 @@ public class ModConfigViewModel : ViewModelBase
         try
         {
             string selectedPath = Path.GetDirectoryName(SelectedItem.ItemPath) ?? throw new InvalidOperationException();
-            await Application.Current!.Clipboard!.SetTextAsync(selectedPath);
+            await SetSelectionToClipboardAsync.Handle(selectedPath);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Debug.WriteLine(ex.StackTrace);
+            await ShowErrorDialog.Handle(e.Message);
+            Debug.WriteLine(e.StackTrace);
         }
     }
 
@@ -291,9 +301,10 @@ public class ModConfigViewModel : ViewModelBase
             });
             return mod;
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Debug.WriteLine(ex.StackTrace);
+            await ShowErrorDialog.Handle(e.Message);
+            Debug.WriteLine(e.StackTrace);
             return null;
         }
     }

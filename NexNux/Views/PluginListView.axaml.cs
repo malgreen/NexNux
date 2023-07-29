@@ -131,8 +131,8 @@ public partial class PluginListView : UserControl
             plvm.ReorderPlugin(sourceIndex, targetIndex);
 
             // This is necessary for some reason, maybe because DataGrid cells are recycled?
-            this.GetControl<DataGrid>("PluginsGrid").Items = null;
-            this.GetControl<DataGrid>("PluginsGrid").Items = plvm.VisiblePlugins;
+            this.GetControl<DataGrid>("PluginsGrid").ItemsSource = null;
+            this.GetControl<DataGrid>("PluginsGrid").ItemsSource = plvm.VisiblePlugins;
 
             // Remove the line that indicates drop point
             ClearDropPoint();

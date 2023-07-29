@@ -7,14 +7,16 @@ using ReactiveUI;
 using System;
 using System.Threading.Tasks;
 using Avalonia.ReactiveUI;
-using MessageBox.Avalonia;
-using MessageBox.Avalonia.Enums;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using NexNux.ViewModels;
 using Avalonia.VisualTree;
 using System.Linq;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
+using System.Reactive.Joins;
 
 namespace NexNux.Views;
 
@@ -142,8 +144,8 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
             mlvm.VisibleMods.Move(sourceIndex, targetIndex);
 
             // This is necessary for some reason, maybe because DataGrid cells are recycled?
-            this.GetControl<DataGrid>("GridMods").Items = null; 
-            this.GetControl<DataGrid>("GridMods").Items = mlvm.VisibleMods;
+            this.GetControl<DataGrid>("GridMods").ItemsSource = null; 
+            this.GetControl<DataGrid>("GridMods").ItemsSource = mlvm.VisibleMods;
 
             // Remove the line that indicates drop point
             ClearDropPoint();
@@ -152,62 +154,68 @@ public partial class ModListView : ReactiveUserControl<ModListViewModel>
 
     private async Task DoShowErrorDialogAsync(InteractionContext<string, bool> interactionContext)
     {
-        var messageBox = MessageBoxManager.GetMessageBoxStandardWindow("Error!", interactionContext.Input, ButtonEnum.Ok, Icon.Warning);
-        await messageBox.ShowDialog(GetMainWindow());
+        var messageBox = MessageBoxManager.GetMessageBoxStandard("Error!", interactionContext.Input, ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Warning);
+        await messageBox.ShowAsPopupAsync(this);
         interactionContext.SetOutput(true);
     }
 
     private async Task DoShowModInstallDialogAsync(InteractionContext<ModConfigViewModel, Mod?> interactionContext)
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog
+        IStorageProvider? storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storageProvider == null) return;
+
+        var fileTypeFilter = new List<FilePickerFileType>
         {
-            AllowMultiple = false,
-            Title = "Choose mod archive",
-            Filters = new List<FileDialogFilter>
-            {
-                new FileDialogFilter()
-                {
-                    Extensions = new List<string> {"zip", "rar", "7z", "gzip"} // tar support removed
-                }
-            }
+            new FilePickerFileType("Compressed Archives") { Patterns = new[] { "*.zip", "*.rar", "*.7z", "*.gzip" } }
         };
-        
-        string[]? result = await openFileDialog.ShowAsync(GetMainWindow() ?? throw new InvalidOperationException());
-        if (result == null || result.Length < 1)
+
+        var files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Open Mod Archive",
+            AllowMultiple = false,
+            SuggestedStartLocation = await storageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Downloads),
+            FileTypeFilter = fileTypeFilter
+        });
+
+        if (files.Count >= 1)
+        {
+            string filePath = files[0].TryGetLocalPath() ?? string.Empty;
+
+            // Show a ModConfigView as a Dialog window to the current window
+            ModConfigView modConfigView = new ModConfigView();
+            interactionContext.Input.UpdateModArchive(string.Join("", filePath));
+            modConfigView.DataContext = interactionContext.Input;
+            Mod mod = await modConfigView.ShowDialog<Mod>(GetMainWindow() ?? throw new InvalidOperationException());
+
+            interactionContext.SetOutput(mod);
+        }
+        else
         {
             interactionContext.SetOutput(null);
-            return;
         }
-
-        ModConfigView dialog = new ModConfigView();
-        interactionContext.Input.UpdateModArchive(string.Join("", result));
-        dialog.DataContext = interactionContext.Input;
-
-        Mod mod = await dialog.ShowDialog<Mod>(GetMainWindow() ?? throw new InvalidOperationException());
-        interactionContext.SetOutput(mod);
     }
     
     private async Task DoShowModUninstallDialogAsync(InteractionContext<Mod, bool> interactionContext)
     {
-        var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
+        var messageBox = MessageBoxManager.GetMessageBoxStandard(
             $"Uninstalling {interactionContext.Input}, are you sure?",
             $"This will also delete the files for \"{interactionContext.Input}\" from your system.", // currently this is a lie
             ButtonEnum.OkCancel,
             Icon.Warning
         );
-        var result = await messageBox.ShowDialog(GetMainWindow());
+        var result = await messageBox.ShowAsPopupAsync(GetMainWindow());
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
     private async Task DoShowModExistsDialogAsync(InteractionContext<Mod?, bool> interactionContext)
     {
-        var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
+        var messageBox = MessageBoxManager.GetMessageBoxStandard(
             "Mod already exists",
             $"Mod \"{interactionContext.Input}\" already exists, continuing will merge the two while overriding existing files.", // currently this is a lie
             ButtonEnum.OkCancel,
             Icon.Info
         );
-        var result = await messageBox.ShowDialog(GetMainWindow());
+        var result = await messageBox.ShowAsPopupAsync(GetMainWindow());
         interactionContext.SetOutput(result == ButtonResult.Ok);
     }
 
