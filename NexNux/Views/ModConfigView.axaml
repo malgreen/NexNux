@@ -9,6 +9,7 @@
         Width="450" Height="450"
         MinWidth="450" MinHeight="450"
         x:Class="NexNux.Views.ModConfigView"
+        x:DataType="vm:ModConfigViewModel"
         Title="NexNux - Mod Configurator"
         Icon="/Assets/NexNux.ico">
   <Design.DataContext>
@@ -47,10 +48,10 @@
                   <TextBlock.ContextFlyout>
                     <MenuFlyout>
                       <MenuItem Header="Make root"
-                                Command="{Binding $parent[TreeView].DataContext.SetSelectionToRootCommand}"
+                                Command="{Binding $parent[TreeView].((vm:ModConfigViewModel)DataContext).SetSelectionToRootCommand}"
                                 IsEnabled="{Binding $parent[TreeView].SelectedItem, Converter={StaticResource IsModItemFolderConverter}}"/>
                       <MenuItem Header="Copy path"
-                                Command="{Binding $parent[TreeView].DataContext.SetSelectionToClipboardCommand}"
+                                Command="{Binding $parent[TreeView].((vm:ModConfigViewModel)DataContext).SetSelectionToClipboardCommand}"
                                                   />
                     </MenuFlyout>
                   </TextBlock.ContextFlyout>

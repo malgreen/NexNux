@@ -5,7 +5,8 @@
              xmlns:material="using:Material.Icons.Avalonia"
              xmlns:vm="clr-namespace:NexNux.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NexNux.Views.PluginListView">
+             x:Class="NexNux.Views.PluginListView"
+             x:DataType="vm:PluginListViewModel">
   <Design.DataContext>
     <vm:PluginListViewModel/>
   </Design.DataContext>

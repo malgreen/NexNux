@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
+using NexNux.Utilities;
 
 namespace NexNux.Models.Gamebryo;
 
@@ -48,7 +49,7 @@ public class GamebryoPluginList
         SetIndices();
         SetPluginTimeStamps();
         using FileStream createStream = File.Create(_pluginListFileName);
-        JsonSerializer.Serialize(createStream, Plugins, new JsonSerializerOptions(){ WriteIndented = true });
+        JsonSerializer.Serialize(createStream, Plugins, typeof(ObservableCollection<GamebryoPlugin>), GbPluginsSerializerContext.Default);
         createStream.Dispose();
         SavePluginsToFile(_pluginsTxtPath, _gameType == GameType.BGSPostSkyrim);
         SavePluginsToFile(_loadorderTxtPath, false);
@@ -67,8 +68,8 @@ public class GamebryoPluginList
         try
         {
             string jsonString = File.ReadAllText(_pluginListFileName);
-            Plugins = JsonSerializer.Deserialize<ObservableCollection<GamebryoPlugin>>(jsonString) ??
-                      throw new InvalidOperationException();
+            Plugins = JsonSerializer.Deserialize(jsonString, typeof(ObservableCollection<GamebryoPlugin>), GbPluginsSerializerContext.Default) 
+                      as ObservableCollection<GamebryoPlugin> ?? throw new InvalidOperationException();
         }
         catch (FileNotFoundException)
         {

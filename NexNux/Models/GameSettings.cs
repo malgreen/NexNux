@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using NexNux.Utilities;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -38,7 +39,7 @@ public class GameSettings
         else
         {
             string jsonString = File.ReadAllText(_settingsFileName);
-            GameSettings? loadedSettings = JsonSerializer.Deserialize<GameSettings>(jsonString);
+            GameSettings? loadedSettings = JsonSerializer.Deserialize(jsonString, typeof(GameSettings), GameSettingsSerializerContext.Default) as GameSettings;
             if (loadedSettings == null) return;
             
             // Below all properties should be set to the loaded objects fields
@@ -50,7 +51,7 @@ public class GameSettings
     {
         if (_settingsFileName == null) return;
         using FileStream createStream = File.Create(_settingsFileName);
-        JsonSerializer.Serialize(createStream, this, new JsonSerializerOptions() { WriteIndented = true });
+        JsonSerializer.Serialize(createStream, this, typeof(GameSettings), GameSettingsSerializerContext.Default);
         createStream.Dispose();
     }
 

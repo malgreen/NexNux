@@ -4,8 +4,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:material="using:Material.Icons.Avalonia"
         xmlns:vm="clr-namespace:NexNux.ViewModels;assembly=NexNux"
+        xmlns:utils="clr-namespace:NexNux.Utilities;assembly=NexNux"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NexNux.Views.HomeView"
+        x:DataType="vm:HomeViewModel"
         Title="{Binding CurrentTitle}"
         Icon="/Assets/NexNux.ico"
         >
@@ -71,7 +73,7 @@
       
       <TabControl.ContentTemplate>
         <DataTemplate>
-          <UserControl Content="{Binding ContentControl}"></UserControl>
+          <UserControl Content="{Binding ContentControl, DataType={x:Type utils:NexNuxTabItem}}"></UserControl>
         </DataTemplate>
       </TabControl.ContentTemplate>
       

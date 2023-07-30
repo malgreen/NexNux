@@ -147,15 +147,16 @@ public sealed class SymLinkDeployer : IModDeployer
     {
         Directory.CreateDirectory(Path.GetDirectoryName(_jsonPath) ?? throw new InvalidOperationException());
         using FileStream createStream = File.Create(_jsonPath);
-        JsonSerializer.Serialize(createStream, _deployedFiles, new JsonSerializerOptions() { WriteIndented = true });
+        JsonSerializer.Serialize(createStream, _deployedFiles, typeof(List<string>), StringsSerializerContext.Default);
         createStream.Dispose();
     }
     private void LoadLinkedMods()
     {
         if (!File.Exists(_jsonPath))
             SaveLinkedMods();
-        string fileContent = File.ReadAllText(_jsonPath);
-        _deployedFiles = JsonSerializer.Deserialize<List<string>>(fileContent) ?? throw new InvalidOperationException();
+        string jsonString = File.ReadAllText(_jsonPath);
+        _deployedFiles = JsonSerializer.Deserialize(jsonString, typeof(List<string>), StringsSerializerContext.Default) as List<string>
+                         ?? throw new InvalidOperationException();
     }
 
     private void OnFileLinked(FileDeployedArgs e)

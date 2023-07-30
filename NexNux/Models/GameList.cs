@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NexNux.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -22,7 +23,7 @@ public class GameList
         {
             Directory.CreateDirectory(Path.GetDirectoryName(GameListFile) ?? throw new InvalidOperationException());
             using FileStream createStream = File.Create(GameListFile);
-            JsonSerializer.Serialize(createStream, Games, new JsonSerializerOptions() { WriteIndented = true });
+            JsonSerializer.Serialize(createStream, Games, typeof(List<Game>), GamesSerializerContext.Default);
             createStream.Dispose();
 
         }
@@ -38,7 +39,7 @@ public class GameList
         try
         {
             string jsonString = File.ReadAllText(GameListFile);
-            loadedGames = JsonSerializer.Deserialize<List<Game>>(jsonString) ?? throw new InvalidOperationException();
+            loadedGames = JsonSerializer.Deserialize(jsonString, typeof(List<Game>), GamesSerializerContext.Default) as List<Game> ?? throw new InvalidOperationException();
         }
         catch (FileNotFoundException ex)
         {

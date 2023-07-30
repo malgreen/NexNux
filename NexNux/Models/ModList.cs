@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NexNux.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -23,7 +24,7 @@ public class ModList
         try
         {
             using FileStream createStream = File.Create(_modListFileName);
-            JsonSerializer.Serialize(createStream, Mods, new JsonSerializerOptions(){ WriteIndented = true });
+            JsonSerializer.Serialize(createStream, Mods, typeof(List<Mod>), ModsSerializerContext.Default);
             createStream.Dispose();
         }
         catch (Exception ex)
@@ -45,7 +46,7 @@ public class ModList
         else
         {
             string jsonString = File.ReadAllText(_modListFileName);
-            loadedMods = JsonSerializer.Deserialize<List<Mod?>>(jsonString) ?? throw new InvalidOperationException();
+            loadedMods = JsonSerializer.Deserialize(jsonString, typeof(List<Mod>), ModsSerializerContext.Default) as List<Mod?> ?? throw new InvalidOperationException();
         }
 
         return loadedMods;
