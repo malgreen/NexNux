@@ -18,7 +18,7 @@ public partial class MainWindowViewModel : ViewModelBase
             DataContext = new GameSelectionViewModel()
         };
 
-        if (Application.Current.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime desktop)
+        if (Application.Current?.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime desktop)
         {
             var y = desktop.MainWindow;
             Console.WriteLine(y);

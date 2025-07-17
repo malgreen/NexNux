@@ -26,7 +26,7 @@ public class LinkDeploymentRepository : ILinkDeploymentRepository
 
     public event EventHandler<DeployingModEventArgs>? DeployingMod;
 
-    public bool LinkModsBottomUp(List<Mod> mods)
+    public async Task LinkModsBottomUp(List<Mod> mods)
     {
         mods.Reverse();
         var totalMods = mods.Count;
@@ -34,7 +34,7 @@ public class LinkDeploymentRepository : ILinkDeploymentRepository
         foreach (var mod in mods)
         {
             DeployingMod?.Invoke(this, new DeployingModEventArgs(mod.Name, modNumber, totalMods));
-            var linkedFiles = GetLinkedFiles();
+            var linkedFiles = await GetLinkedFiles();
             foreach (var file in Directory.GetFiles(mod.Path))
             {
                 var relativeFilePath = Path.GetRelativePath(FullPath(mod.Path), FullPath(file));
@@ -55,19 +55,17 @@ public class LinkDeploymentRepository : ILinkDeploymentRepository
                 linkedFiles.Add(FullPath(finalFilePath));
             }
 
-            SerializeJson(linkedFiles);
+            await JsonListHelper.SerializeListToJsonAsync(linkedFiles, _jsonPath, StringsSerializerContext.Default.ListString);
             modNumber++;
         }
-
-        return true;
     }
 
-    public bool RestoreCache()
+    public async Task RestoreCache()
     {
-        var linkedFiles = GetLinkedFiles();
+        var linkedFiles = await GetLinkedFiles();
         foreach (var file in linkedFiles) File.Delete(FullPath(file));
 
-        SerializeJson(new List<string>());
+        await JsonListHelper.SerializeListToJsonAsync(new List<string>(), _jsonPath, StringsSerializerContext.Default.ListString);
 
         var cachedFiles = GetCachedFiles();
         foreach (var file in cachedFiles)
@@ -76,31 +74,14 @@ public class LinkDeploymentRepository : ILinkDeploymentRepository
             var finalPath = Path.Combine(_gameDirectory, relativePath);
             File.Move(FullPath(file), finalPath, true);
         }
-
-        return true;
     }
 
-    private List<string> GetLinkedFiles()
+    private async Task<List<string>> GetLinkedFiles()
     {
-        return DeserializeJson();
+        return await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, StringsSerializerContext.Default.ListString);
     }
 
-    /// <summary>
-    ///     Creates a hard link using Windows DLL import, therefore this method only works on Windows.
-    ///     Taken from https://stackoverflow.com/a/3387777
-    /// </summary>
-    /// <param name="lpFileName">Target path</param>
-    /// <param name="lpExistingFileName">Source path</param>
-    /// <param name="lpSecurityAttributes">Should be IntPtr.Zero</param>
-    /// <returns></returns>
-    [DllImport("Kernel32.dll", CharSet = CharSet.Unicode)]
-    private static extern bool CreateHardLink(
-        string lpFileName,
-        string lpExistingFileName,
-        IntPtr lpSecurityAttributes
-    );
-
-    private bool LinkFile(string fromPath, string toPath)
+    private static bool LinkFile(string fromPath, string toPath)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return CreateHardLink(toPath, fromPath, IntPtr.Zero);
         var link = File.CreateSymbolicLink(FullPath(toPath), FullPath(fromPath));
@@ -112,29 +93,26 @@ public class LinkDeploymentRepository : ILinkDeploymentRepository
         return Directory.GetFiles(_cacheDirectory, "*.*", SearchOption.AllDirectories).ToList();
     }
 
-    private bool SerializeJson(List<string> files)
-    {
-        if (!File.Exists(_jsonPath))
-            JsonListHelper.CreateJsonFromList(files, _jsonPath, StringsSerializerContext.Default.ListString);
-        JsonListHelper.SerializeListToJson(files, _jsonPath, StringsSerializerContext.Default.ListString);
-        return true;
-    }
-
-    private List<string> DeserializeJson()
-    {
-        if (!File.Exists(_jsonPath))
-            JsonListHelper.CreateJsonFromList(new List<string>(), _jsonPath,
-                StringsSerializerContext.Default.ListString);
-        return JsonListHelper.DeserializeJsonToList(_jsonPath, StringsSerializerContext.Default.ListString);
-    }
-
     /// <summary>
     ///     Shorthand for the Path.GetFullPath(string) method.
     /// </summary>
     /// <param name="path">Input path to a file/directory</param>
     /// <returns>A full path of a string.</returns>
-    private static string FullPath(string path)
-    {
-        return Path.GetFullPath(path);
-    }
+    private static string FullPath(string path) => Path.GetFullPath(path);
+
+    /// <summary>
+    ///     Creates a hard link using Windows DLL import, therefore this method only works on Windows.
+    ///     Taken from https://stackoverflow.com/a/3387777
+    ///     FIXME: Should use LibraryImport attribute
+    /// </summary>
+    /// <param name="lpFileName">Target path</param>
+    /// <param name="lpExistingFileName">Source path</param>
+    /// <param name="lpSecurityAttributes">Should be IntPtr.Zero</param>
+    /// <returns></returns>
+    [DllImport("Kernel32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool CreateHardLink(
+        string lpFileName,
+        string lpExistingFileName,
+        IntPtr lpSecurityAttributes
+    );
 }

@@ -10,7 +10,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Controls"/>
         <AvaloniaResource Include="Assets\**"/>
         <None Remove=".gitignore"/>
     </ItemGroup>

@@ -14,7 +14,7 @@ public static class TaskHelper
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            DialogHelper.ShowDialog("Error", ex.Message);
+            DialogHelper.ShowMessageDialog("Error", ex.Message);
             return default;
         }
     }

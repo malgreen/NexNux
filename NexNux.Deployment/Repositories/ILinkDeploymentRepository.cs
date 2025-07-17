@@ -5,7 +5,7 @@ namespace NexNux.Deployment.Repositories;
 
 public interface ILinkDeploymentRepository
 {
-    public bool LinkModsBottomUp(List<Mod> mods);
-    public bool RestoreCache();
+    public Task LinkModsBottomUp(List<Mod> mods);
+    public Task RestoreCache();
     public event EventHandler<DeployingModEventArgs> DeployingMod;
 }

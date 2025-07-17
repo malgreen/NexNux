@@ -21,42 +21,40 @@ public class BgsPluginRepositoryJson : IBgsPluginRepository
         _bgsGameType = bgsGame.GetType();
     }
 
-    public List<BgsPlugin> GetBgsPlugins()
+    public async Task<List<BgsPlugin>> GetBgsPlugins()
     {
-        SyncBgsPluginsWithDisc();
-        return DeserializeJson();
+        await SyncBgsPluginsWithDisc();
+        return await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
     }
 
-    public bool UpdateBgsPlugin(BgsPlugin bgsPlugin)
+    public async Task UpdateBgsPlugin(BgsPlugin bgsPlugin)
     {
-        var plugins = DeserializeJson();
+        var plugins = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
         var index = plugins.FindIndex(p => p.Name == bgsPlugin.Name);
         if (index == -1)
-            return false;
+            throw new Exception("Plugin name not found!"); //TODO: all of these 'custom' exceptions could be replaced by using .Find() instead of .FindIndex()
         plugins[index].IsEnabled = bgsPlugin.IsEnabled;
 
-        SerializeJson(plugins);
+        await JsonListHelper.SerializeListToJsonAsync(plugins, _jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
         WriteBgsPluginNamesToTxtFiles(plugins);
         SetTimestamps(plugins);
-        return true;
     }
 
-    public bool ReorderBgsPluginByIndices(int oldIndex, int newIndex)
+    public async Task ReorderBgsPluginByIndices(int oldIndex, int newIndex)
     {
-        var plugins = DeserializeJson();
+        var plugins = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
         var plugin = plugins[oldIndex];
         plugins.RemoveAt(oldIndex);
         plugins.Insert(newIndex, plugin);
 
-        SerializeJson(plugins);
+        await JsonListHelper.SerializeListToJsonAsync(plugins, _jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
         WriteBgsPluginNamesToTxtFiles(plugins);
         SetTimestamps(plugins);
-        return true;
     }
 
-    private bool SyncBgsPluginsWithDisc()
+    private async Task SyncBgsPluginsWithDisc()
     {
-        var plugins = DeserializeJson();
+        var plugins = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
         var folderPlugins = ReadBgsPluginsFromGameFolder();
         var txtPlugins = ReadBgsPluginsFromTxtFile();
 
@@ -66,25 +64,9 @@ public class BgsPluginRepositoryJson : IBgsPluginRepository
         plugins = plugins.Except(absentPlugins).ToList();
         plugins.AddRange(newPlugins);
 
-        SerializeJson(plugins);
+        await JsonListHelper.SerializeListToJsonAsync(plugins, _jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
         WriteBgsPluginNamesToTxtFiles(plugins);
         SetTimestamps(plugins);
-        return true;
-    }
-
-    private List<BgsPlugin> DeserializeJson()
-    {
-        if (!File.Exists(_jsonPath))
-            JsonListHelper.CreateJsonFromList(ReadBgsPluginsFromTxtFile(), _jsonPath,
-                BgsPluginsSerializerContext.Default.ListBgsPlugin);
-        return JsonListHelper.DeserializeJsonToList(_jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
-    }
-
-    private void SerializeJson(List<BgsPlugin> bgsPlugins)
-    {
-        if (!File.Exists(_jsonPath))
-            JsonListHelper.CreateJsonFromList(bgsPlugins, _jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
-        JsonListHelper.SerializeListToJson(bgsPlugins, _jsonPath, BgsPluginsSerializerContext.Default.ListBgsPlugin);
     }
 
     private List<BgsPlugin> ReadBgsPluginsFromGameFolder()

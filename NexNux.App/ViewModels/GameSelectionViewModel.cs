@@ -2,27 +2,42 @@
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using NexNux.App.Utilities;
+using NexNux.App.Views;
 using NexNux.Core.Models;
-using NexNux.Core.Services;
+using NexNux.Core.Repositories;
 
 namespace NexNux.App.ViewModels;
 
 public partial class GameSelectionViewModel : ViewModelBase
 {
-    private readonly GameService _gameService = new();
+    // private readonly GameService _gameService = new();
+    private readonly IGameRepository _gameRepository = new GameRepositoryJson();
+    
     [ObservableProperty] private IEnumerable<Game> _games = new List<Game>();
     [ObservableProperty] private Game? _selectedGame;
+    
+    
+    
 
+    
     public GameSelectionViewModel()
     {
         GetGames();
     }
 
     [RelayCommand]
-    private void AddGame()
+    private async void AddGame()
     {
-        Console.WriteLine("adding game");
+        var viewmodel = new GameConfigurationViewModel();
+        var dialog = new GameConfigurationWindow();
+        dialog.DataContext = viewmodel;
+
+        // doesn't seem very mvvm to me
+        var result = await DialogHelper.ShowDialog<Game?>(dialog);
+
+        Console.WriteLine(result);
     }
 
     [RelayCommand]
@@ -40,14 +55,14 @@ public partial class GameSelectionViewModel : ViewModelBase
 
     private async void GetGames()
     {
-        Games = await TaskHelper.TryRunAsync(_gameService.GetAll) ?? new List<Game>();
-        // try
-        // {
-        //     Games = await _gameService.GetAll();
-        // }
-        // catch (Exception ex)
-        // {
-        //     
-        // }
+        try
+        {
+            Games = await _gameRepository.GetGames();
+        }
+        catch (Exception ex)
+        {
+            // this doesn't work?
+            DialogHelper.ShowMessageDialog("error", ex.Message);
+        }
     }
 }

@@ -4,9 +4,9 @@ namespace NexNux.Core.Repositories;
 
 public interface IGameRepository
 {
-    public List<Game> GetGames();
-    public Game? GetGameById(Guid gameId);
-    public bool AddGame(Game game);
-    public bool RemoveGameById(Guid gameId);
-    public bool ModifyGame(Game game);
+    public Task<List<Game>> GetGames();
+    public Task<Game?> GetGameById(Guid gameId);
+    public Task AddGame(Game game);
+    public Task RemoveGameById(Guid gameId);
+    public Task ModifyGame(Game game);
 }

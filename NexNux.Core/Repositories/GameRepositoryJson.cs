@@ -9,58 +9,42 @@ public class GameRepositoryJson : IGameRepository
     private readonly string _jsonPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NexNux", "games.json");
 
-    public List<Game> GetGames()
+    public async Task<List<Game>> GetGames()
     {
-        return DeserializeJson();
+        return await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, GamesSerializerContext.Default.ListGame);
     }
 
-    public Game? GetGameById(Guid gameId)
+    public async Task<Game?> GetGameById(Guid gameId)
     {
-        return DeserializeJson().Find(g => g.Id == gameId);
+        var games = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, GamesSerializerContext.Default.ListGame);
+        return games.Find(g => g.Id == gameId);
     }
 
-    public bool AddGame(Game game)
+    public async Task AddGame(Game game)
     {
-        var games = DeserializeJson();
+        var games = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, GamesSerializerContext.Default.ListGame);
         games.Add(game);
-        SerializeJson(games);
-        return true;
+        await JsonListHelper.SerializeListToJsonAsync(games, _jsonPath, GamesSerializerContext.Default.ListGame);
     }
 
-    public bool RemoveGameById(Guid gameId)
+    public async Task RemoveGameById(Guid gameId)
     {
-        var games = DeserializeJson();
+        var games = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, GamesSerializerContext.Default.ListGame);
         games = games.Where(g => g.Id != gameId).ToList();
-        SerializeJson(games);
-        return true;
+        await JsonListHelper.SerializeListToJsonAsync(games, _jsonPath, GamesSerializerContext.Default.ListGame);
     }
 
-    public bool ModifyGame(Game game)
+    public async Task ModifyGame(Game game)
     {
-        var games = DeserializeJson();
+        var games = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, GamesSerializerContext.Default.ListGame);
         var index = games.FindIndex(g => g.Id == game.Id);
         if (index == -1)
-            return false;
+            throw new Exception("Game ID not found!");
         games[index].Name = game.Name;
         games[index].GameDirectory = game.GameDirectory;
         games[index].NexNuxDirectory = game.NexNuxDirectory;
         if (game is BgsGame bgsGame && games[index] is BgsGame)
             ((BgsGame)games[index]).AppDataDirectory = bgsGame.AppDataDirectory;
-        SerializeJson(games);
-        return true;
-    }
-
-    private List<Game> DeserializeJson()
-    {
-        if (!File.Exists(_jsonPath))
-            JsonListHelper.CreateJsonFromList(new List<Game>(), _jsonPath, GamesSerializerContext.Default.ListGame);
-        return JsonListHelper.DeserializeJsonToList(_jsonPath, GamesSerializerContext.Default.ListGame);
-    }
-
-    private void SerializeJson(List<Game> games)
-    {
-        if (!File.Exists(_jsonPath))
-            JsonListHelper.CreateJsonFromList(games, _jsonPath, GamesSerializerContext.Default.ListGame);
-        JsonListHelper.SerializeListToJson(games, _jsonPath, GamesSerializerContext.Default.ListGame);
+        await JsonListHelper.SerializeListToJsonAsync(games, _jsonPath, GamesSerializerContext.Default.ListGame);
     }
 }

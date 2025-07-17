@@ -12,72 +12,53 @@ public class ModRepositoryJson : IModRepository
         _jsonPath = Path.Combine(game.NexNuxDirectory, "mods.json");
     }
 
-    public List<Mod> GetMods()
+    public async Task<List<Mod>> GetMods()
     {
-        return DeserializeJson();
+        return await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, ModsSerializerContext.Default.ListMod);
     }
 
-    public bool SetMods(List<Mod> mods)
+    public async Task SetMods(List<Mod> mods)
     {
-        SerializeJson(mods);
-        return true;
+        await JsonListHelper.SerializeListToJsonAsync(mods, _jsonPath, ModsSerializerContext.Default.ListMod);
     }
 
-    public Mod? GetModById(Guid modId)
+    public async Task<Mod?> GetModById(Guid modId)
     {
-        return DeserializeJson().Find(m => m.Id == modId);
+        return (await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, ModsSerializerContext.Default.ListMod)).Find(m => m.Id == modId);
     }
 
-    public bool AddMod(Mod mod)
+    public async Task AddMod(Mod mod)
     {
-        var mods = DeserializeJson();
+        var mods = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, ModsSerializerContext.Default.ListMod);
         mods.Add(mod);
-        SerializeJson(mods);
-        return true;
+        await JsonListHelper.SerializeListToJsonAsync(mods, _jsonPath, ModsSerializerContext.Default.ListMod);
     }
 
-    public bool RemoveModById(Guid modId)
+    public async Task RemoveModById(Guid modId)
     {
-        var mods = DeserializeJson();
+        var mods = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, ModsSerializerContext.Default.ListMod);
         mods = mods.Where(m => m.Id != modId).ToList();
-        SerializeJson(mods);
-        return true;
+        await JsonListHelper.SerializeListToJsonAsync(mods, _jsonPath, ModsSerializerContext.Default.ListMod);
     }
 
-    public bool ModifyMod(Mod mod)
+    public async Task ModifyMod(Mod mod)
     {
-        var mods = DeserializeJson();
+        var mods = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, ModsSerializerContext.Default.ListMod);
         var index = mods.FindIndex(m => m.Id == mod.Id);
         if (index == -1)
-            return false;
+            throw new Exception("Mod ID not found!");
         mods[index].Name = mod.Name;
         mods[index].Path = mod.Path;
         mods[index].IsEnabled = mod.IsEnabled;
-        SerializeJson(mods);
-        return true;
+        await JsonListHelper.SerializeListToJsonAsync(mods, _jsonPath, ModsSerializerContext.Default.ListMod);
     }
 
-    public bool ReorderModByIndices(int oldIndex, int newIndex)
+    public async Task ReorderModByIndices(int oldIndex, int newIndex)
     {
-        var mods = DeserializeJson();
+        var mods = await JsonListHelper.DeserializeJsonToListAsync(_jsonPath, ModsSerializerContext.Default.ListMod);
         var mod = mods[oldIndex];
         mods.RemoveAt(oldIndex);
         mods.Insert(newIndex, mod);
-        SerializeJson(mods);
-        return true;
-    }
-
-    private List<Mod> DeserializeJson()
-    {
-        if (!File.Exists(_jsonPath))
-            JsonListHelper.CreateJsonFromList(new List<Mod>(), _jsonPath, ModsSerializerContext.Default.ListMod);
-        return JsonListHelper.DeserializeJsonToList(_jsonPath, ModsSerializerContext.Default.ListMod);
-    }
-
-    private void SerializeJson(List<Mod> mods)
-    {
-        if (!File.Exists(_jsonPath))
-            JsonListHelper.CreateJsonFromList(new List<Mod>(), _jsonPath, ModsSerializerContext.Default.ListMod);
-        JsonListHelper.SerializeListToJson(mods, _jsonPath, ModsSerializerContext.Default.ListMod);
+        await JsonListHelper.SerializeListToJsonAsync(mods, _jsonPath, ModsSerializerContext.Default.ListMod);
     }
 }

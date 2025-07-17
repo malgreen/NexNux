@@ -4,7 +4,7 @@ namespace NexNux.Core.Repositories.Bgs;
 
 public interface IBgsPluginRepository
 {
-    public List<BgsPlugin> GetBgsPlugins();
-    public bool UpdateBgsPlugin(BgsPlugin bgsPlugin);
-    public bool ReorderBgsPluginByIndices(int oldIndex, int newIndex);
+    public Task<List<BgsPlugin>> GetBgsPlugins();
+    public Task UpdateBgsPlugin(BgsPlugin bgsPlugin);
+    public Task ReorderBgsPluginByIndices(int oldIndex, int newIndex);
 }

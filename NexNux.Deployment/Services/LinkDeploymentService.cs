@@ -22,14 +22,15 @@ public class LinkDeploymentService : IDeploymentService
 
     public event EventHandler<DeployingModEventArgs>? DeployingMod;
 
-    public async Task<bool> Deploy(List<Mod> mods)
+    public async Task Deploy(List<Mod> mods)
     {
-        return await Task.Run(() => _repository.RestoreCache() && _repository.LinkModsBottomUp(mods));
+        await _repository.RestoreCache();
+        await _repository.LinkModsBottomUp(mods);
     }
 
-    public async Task<bool> Clear()
+    public async Task Clear()
     {
-        return await Task.Run(() => _repository.RestoreCache());
+        await _repository.RestoreCache();
     }
 
     private void OnDeployingMod(object? sender, DeployingModEventArgs e)

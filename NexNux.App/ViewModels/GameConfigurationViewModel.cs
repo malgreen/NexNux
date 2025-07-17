@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NexNux.Core.Models;
 using NexNux.Core.Models.Bgs;
-using NexNux.Core.Services;
+using NexNux.Core.Repositories;
 
 namespace NexNux.App.ViewModels;
 
@@ -13,15 +13,17 @@ public partial class GameConfigurationViewModel : ViewModelBase
     [ObservableProperty] private string _appDataDirectory = "";
     [ObservableProperty] private string _gameDirectory = "";
 
-    private GameService _gameService;
+
+    private IGameRepository _gameRepository = new GameRepositoryJson();
+    // private GameService _gameService;
     [ObservableProperty] private int _gameTypeIndex;
     [ObservableProperty] private string _name = "";
     [ObservableProperty] private string _nexNuxDirectory = "";
 
-    public GameConfigurationViewModel(GameService gameService)
-    {
-        _gameService = gameService;
-    }
+    // public GameConfigurationViewModel(GameService gameService)
+    // {
+    //     _gameService = gameService;
+    // }
 
     [RelayCommand]
     private async Task<Game?> Save()
